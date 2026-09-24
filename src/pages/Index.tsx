@@ -24,9 +24,6 @@ type Question = {
 
 type Report = Awaited<ReturnType<typeof submitRaiox>>['report']
 
-const LOGO_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 111"><rect width="500" height="111" fill="none"/><text x="0" y="82" fill="#bde038" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" letter-spacing="7">SIMBIOSIA</text></svg>'
-
 function createRaioxPdf(report: Report) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const margin = 18
@@ -50,14 +47,25 @@ function createRaioxPdf(report: Report) {
     y += lines.length * (size * 0.45) + gap
   }
   try {
-    doc.addImage(
-      'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(LOGO_SVG),
-      'SVG',
-      margin,
-      10,
-      62,
-      14,
-    )
+    const canvas = document.createElement('canvas')
+    const scale = 4
+    canvas.width = 500 * scale
+    canvas.height = 111 * scale
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('sem canvas')
+    ctx.scale(scale, scale)
+    ctx.fillStyle = '#10454f'
+    ctx.font = '700 58px Arial, Helvetica, sans-serif'
+    ctx.textBaseline = 'alphabetic'
+    const word = 'SIMBIOSI'
+    ctx.fillText(word, 2, 80)
+    const w = ctx.measureText(word).width
+    ctx.save()
+    ctx.translate(w + 12 + 29, 80)
+    ctx.transform(1, 0, -0.32, 1, 0, 0)
+    ctx.fillText('Λ', -29, 0)
+    ctx.restore()
+    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, 10, 62, 13.8)
   } catch {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(17)
