@@ -81,6 +81,11 @@ button {
   gap: 18px;
   margin-bottom: 74px;
 }
+.brand-logo {
+  display: block;
+  width: 145px;
+  height: auto;
+}
 .brand-mark {
   font-family: 'Space Grotesk', sans-serif;
   color: var(--teal);
@@ -294,6 +299,11 @@ h3 {
   margin-bottom: 13px;
   color: #789095;
   font-size: 12px;
+}
+.selection-help {
+  margin-top: -2px;
+  color: #6b878a !important;
+  font-weight: 600;
 }
 .question-field textarea,
 .field-grid input {
@@ -610,6 +620,57 @@ h3 {
 .report-shell > .secondary-button {
   margin-top: 10px;
 }
+.confirmation-card {
+  max-width: 620px;
+  margin: 80px auto 0;
+  padding: 42px 34px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(16, 69, 79, 0.08);
+}
+.confirmation-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: var(--lime);
+}
+.confirmation-card h1 {
+  margin: 12px 0 14px;
+  color: var(--teal-deep);
+  font-size: clamp(32px, 5vw, 50px);
+  letter-spacing: -0.05em;
+}
+.confirmation-card > p {
+  max-width: 480px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.confirmation-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  max-width: 440px;
+  margin: 25px auto;
+  padding: 13px 15px;
+  border-radius: 10px;
+  background: var(--pale);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+.confirmation-note svg {
+  flex: 0 0 auto;
+  color: #6f9900;
+}
 
 @media (max-width: 680px) {
   .landing-shell,
@@ -619,6 +680,9 @@ h3 {
   }
   .brand-line {
     margin-bottom: 52px;
+  }
+  .brand-logo {
+    width: 118px;
   }
   .brand-caption {
     font-size: 9px;

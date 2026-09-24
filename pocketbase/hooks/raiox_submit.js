@@ -1,5 +1,6 @@
 routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const body = e.requestInfo().body || {}
+  const mode = body.mode === 'send' ? 'send' : 'prepare'
   const tipo = body.tipo === 'empresa' ? 'empresa' : body.tipo === 'executivo' ? 'executivo' : ''
   const respostas = body.respostas && typeof body.respostas === 'object' ? body.respostas : {}
   const nome = String(body.nome || '').trim()
@@ -14,6 +15,9 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     return e.badRequestError('Informe um e-mail válido.')
   }
   if (body.website) return e.badRequestError('Não foi possível processar a solicitação.')
+  if (mode === 'send' && (!body.pdfBase64 || typeof body.pdfBase64 !== 'string')) {
+    return e.badRequestError('O relatório PDF não foi recebido.')
+  }
 
   const get = (id) => respostas[id]
   const arr = (id) => (Array.isArray(get(id)) ? get(id) : get(id) ? [get(id)] : [])
@@ -510,14 +514,41 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     esc(report.version) +
     '</p></div></div>'
 
+  if (mode === 'prepare') {
+    return e.json(200, { ok: true, emailStatus: 'not_sent', report })
+  }
+
   let emailStatus = 'sent'
   try {
     const settings = $app.settings()
+    const pdfRaw = String(body.pdfBase64 || '').replace(/^data:application\/pdf[^,]*base64,/, '')
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+    const bytes = []
+    let buffer = 0
+    let bits = 0
+    for (let i = 0; i < pdfRaw.length; i += 1) {
+      const code = alphabet.indexOf(pdfRaw.charAt(i))
+      if (code < 0 || code === 64) continue
+      buffer = (buffer << 6) | code
+      bits += 6
+      if (bits >= 8) {
+        bits -= 8
+        bytes.push((buffer >> bits) & 255)
+      }
+    }
+    if (!bytes.length || bytes[0] !== 37 || bytes[1] !== 80 || bytes[2] !== 68 || bytes[3] !== 70) {
+      return e.badRequestError('O arquivo recebido não é um PDF válido.')
+    }
+    const attachment = $filesystem.fileFromBytes(bytes, 'raio-x-farol.pdf')
     const message = new MailerMessage({
       from: { address: settings.meta.senderAddress, name: settings.meta.senderName },
       to: [{ address: email }],
       subject,
-      html,
+      html:
+        '<p>Olá, ' +
+        esc(nome) +
+        '.</p><p>Seu Raio-X FAROL está anexado a este e-mail.</p><p>O relatório é uma autoavaliação orientada e não substitui um diagnóstico profundo.</p><p>— Simbiosia</p>',
+      attachments: { 'raio-x-farol.pdf': attachment.reader.open() },
     })
     $app.newMailClient().send(message)
   } catch (error) {

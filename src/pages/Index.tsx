@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
+import jsPDF from 'jspdf'
 import { submitRaiox, RaioxTipo } from '@/services/raiox'
 
 type Answer = string | string[]
@@ -23,7 +24,97 @@ type Question = {
 
 type Report = Awaited<ReturnType<typeof submitRaiox>>['report']
 
-const COLORS = { teal: '#10454f', lime: '#bde038', gray: '#506266', pale: '#eff6f5' }
+const LOGO_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 111"><rect width="500" height="111" fill="none"/><text x="0" y="82" fill="#bde038" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700" letter-spacing="7">SIMBIOSIA</text></svg>'
+
+function createRaioxPdf(report: Report) {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const margin = 18
+  const width = 210 - margin * 2
+  let y = 20
+  const addText = (
+    text: string,
+    size = 10,
+    color: [number, number, number] = [23, 59, 66],
+    gap = 5,
+  ) => {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(size)
+    doc.setTextColor(...color)
+    const lines = doc.splitTextToSize(String(text), width)
+    if (y + lines.length * (size * 0.45) + gap > 282) {
+      doc.addPage()
+      y = 20
+    }
+    doc.text(lines, margin, y)
+    y += lines.length * (size * 0.45) + gap
+  }
+  try {
+    doc.addImage(
+      'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(LOGO_SVG),
+      'SVG',
+      margin,
+      10,
+      62,
+      14,
+    )
+  } catch {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(17)
+    doc.setTextColor(16, 69, 79)
+    doc.text('SIMBIOSIA', margin, 20)
+  }
+  y = 36
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(22)
+  doc.setTextColor(16, 69, 79)
+  doc.text('Raio-X FAROL', margin, y)
+  y += 9
+  addText('L — Liberação de Valor · Prontidão para liberar valor com IA', 10, [80, 98, 102], 9)
+  addText(`Nome: ${report.nome}`, 10, [23, 59, 66], 3)
+  if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [23, 59, 66], 3)
+  addText(`Cenário atual: ${report.band}`, 14, [16, 69, 79], 7)
+  addText(report.scenario, 10, [80, 98, 102], 8)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
+  doc.text('Seu FAROL', margin, y)
+  y += 8
+  report.stages.forEach((stage) =>
+    addText(
+      `${stage.key} — ${stage.title}: ${stage.score}/100 · ${stage.state}\n${stage.reading}`,
+      10,
+      [23, 59, 66],
+      6,
+    ),
+  )
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
+  doc.text('L — Liberação de Valor', margin, y)
+  y += 8
+  addText(`O valor que já pode ser liberado: ${report.firstValue}`, 10, [23, 59, 66], 5)
+  addText(`Principal trava: ${report.bottleneck.description}.`, 10, [23, 59, 66], 5)
+  addText(`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5)
+  addText(`Medição inicial: ${report.measurement}.`, 10, [23, 59, 66], 7)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
+  doc.text('Próximos sete dias', margin, y)
+  y += 8
+  report.sevenDayPlan.forEach((item, index) =>
+    addText(`${index + 1}. ${item}`, 10, [23, 59, 66], 3),
+  )
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
+  doc.text('Ainda não faça', margin, y)
+  y += 8
+  report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
+  addText(`Próximo produto recomendado: ${report.nextProduct}`, 12, [16, 69, 79], 7)
+  addText(report.limitations, 8, [80, 98, 102], 4)
+  return doc.output('datauristring')
+}
 
 const executiveSections: Array<{
   key: string
@@ -988,92 +1079,46 @@ function Progress({ step, total }: { step: number; total: number }) {
   )
 }
 
-function ReportView({ report, onRestart }: { report: Report; onRestart: () => void }) {
+function ConfirmationView({
+  email,
+  onRestart,
+  success,
+}: {
+  email: string
+  onRestart: () => void
+  success: boolean
+}) {
   return (
     <main className="report-page">
       <div className="report-shell">
         <header className="brand-line">
-          <span className="brand-mark">SIMBIOSIA</span>
+          <img src="/simbiosia-logo.svg" alt="Simbiosia" className="brand-logo" />
           <span className="brand-caption">MÉTODO FAROL</span>
         </header>
-        <div className="report-kicker">L — LIBERAÇÃO DE VALOR</div>
-        <h1>Seu Raio-X FAROL</h1>
-        <p className="report-lead">
-          {report.nome}, este relatório mostra onde começar a liberar valor com IA — sem pular as
-          etapas que dão segurança ao resultado.
-        </p>
-        <section className="report-hero">
-          <div>
-            <span className="eyebrow">Cenário atual</span>
-            <h2>{report.band}</h2>
-            <p>{report.scenario}</p>
+        <div className="confirmation-card">
+          <div className="confirmation-icon">
+            <Mail size={30} />
           </div>
-          <div className="report-score">
-            <strong>{report.overall}</strong>
-            <span>visão geral</span>
+          <div className="report-kicker">L — LIBERAÇÃO DE VALOR</div>
+          <h1>{success ? 'Seu relatório foi enviado.' : 'Não conseguimos enviar o relatório.'}</h1>
+          <p>
+            {success ? (
+              <>
+                O Raio-X FAROL foi enviado para <strong>{email}</strong>. Verifique também a pasta
+                de spam ou promoções.
+              </>
+            ) : (
+              'O relatório não foi enviado. Tente novamente para receber o PDF.'
+            )}
+          </p>
+          <div className="confirmation-note">
+            <ShieldCheck size={18} />
+            <span>O relatório é uma autoavaliação orientada. Não é um diagnóstico profundo.</span>
           </div>
-        </section>
-        <section className="report-card">
-          <h3>Seu FAROL</h3>
-          <div className="stage-grid">
-            {report.stages.map((stage) => (
-              <div className="stage-card" key={stage.key}>
-                <div className="stage-letter">{stage.key}</div>
-                <div>
-                  <strong>{stage.title}</strong>
-                  <span>
-                    {stage.score}/100 · {stage.state}
-                  </span>
-                </div>
-                <p>{stage.reading}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="report-card liberation">
-          <div className="report-section-label">O valor que já pode ser liberado</div>
-          <h3>{report.firstValue}</h3>
-          <p>
-            <strong>Principal trava:</strong> {report.bottleneck.description}.
-          </p>
-          <p>
-            <strong>Primeira aplicação:</strong> {report.primeiraAplicacao}.
-          </p>
-          <p>
-            <strong>Medição inicial:</strong> {report.measurement}.
-          </p>
-        </section>
-        <section className="report-card">
-          <h3>Próximos sete dias</h3>
-          <ol className="report-list">
-            {report.sevenDayPlan.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-        </section>
-        <section className="report-card">
-          <h3>Ainda não faça</h3>
-          <ul className="report-list">
-            {report.avoid.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
-        <section className="next-card">
-          <span>Próximo produto recomendado</span>
-          <strong>{report.nextProduct}</strong>
-          <p>
-            Esta recomendação é baseada nas respostas deste Raio-X. Ela pode mudar quando houver
-            dados, documentos ou contexto adicional.
-          </p>
-        </section>
-        <footer className="report-footer">
-          <ShieldCheck size={18} />
-          <span>{report.limitations}</span>
-        </footer>
-        <button className="secondary-button" onClick={onRestart}>
-          Refazer o Raio-X
-        </button>
+          <button className="secondary-button" onClick={onRestart}>
+            {success ? 'Refazer o Raio-X' : 'Tentar novamente'}
+          </button>
+        </div>
       </div>
     </main>
   )
@@ -1086,9 +1131,10 @@ export default function Index() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [report, setReport] = useState<Report | null>(null)
+  const [confirmation, setConfirmation] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
 
   const sections = useMemo(
     () => (tipo ? (tipo === 'executivo' ? executiveSections : companySections) : []),
@@ -1129,11 +1175,15 @@ export default function Index() {
     return true
   }
   const next = () => {
-    if (validateSection()) setStep((value) => value + 1)
+    if (validateSection()) {
+      setStep((value) => value + 1)
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
   }
   const previous = () => {
     setError('')
     setStep((value) => Math.max(0, value - 1))
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }
   const start = (value: RaioxTipo) => {
     setTipo(value)
@@ -1142,6 +1192,7 @@ export default function Index() {
     setNome('')
     setEmail('')
     setReport(null)
+    setConfirmation(false)
     setError('')
   }
   const restart = () => {
@@ -1151,6 +1202,7 @@ export default function Index() {
     setNome('')
     setEmail('')
     setReport(null)
+    setConfirmation(false)
     setEmailSent(false)
     setError('')
   }
@@ -1168,7 +1220,7 @@ export default function Index() {
     setLoading(true)
     setError('')
     try {
-      const response = await submitRaiox({
+      const basePayload = {
         tipo: tipo!,
         nome: nome.trim(),
         email: email.trim(),
@@ -1179,21 +1231,26 @@ export default function Index() {
               ? answers['C-CAD3']
               : '',
         respostas: answers,
-      })
-      setReport(response.report)
-      setEmailSent(response.emailStatus === 'sent')
+      }
+      const prepared = await submitRaiox({ mode: 'prepare', ...basePayload })
+      const pdfBase64 = createRaioxPdf(prepared.report)
+      const sent = await submitRaiox({ mode: 'send', ...basePayload, pdfBase64 })
+      setReport(prepared.report)
+      setEmailSent(sent.emailStatus === 'sent')
+      setConfirmation(true)
     } catch (err: any) {
       setError(
         err?.response?.message ||
           err?.message ||
-          'Não foi possível gerar o relatório. Tente novamente.',
+          'Não foi possível gerar ou enviar o relatório. Tente novamente.',
       )
     } finally {
       setLoading(false)
     }
   }
 
-  if (report) return <ReportView report={report} onRestart={restart} />
+  if (confirmation)
+    return <ConfirmationView email={email} onRestart={restart} success={emailSent} />
   if (!tipo)
     return (
       <main className="landing">
@@ -1201,7 +1258,7 @@ export default function Index() {
         <div className="landing-orb orb-two" />
         <div className="landing-shell">
           <header className="brand-line">
-            <span className="brand-mark">SIMBIOSIA</span>
+            <img src="/simbiosia-logo.svg" alt="Simbiosia" className="brand-logo" />
             <span className="brand-caption">MÉTODO FAROL</span>
           </header>
           <section className="landing-hero">
@@ -1254,7 +1311,7 @@ export default function Index() {
     <main className="questionnaire">
       <div className="question-shell">
         <header className="brand-line">
-          <span className="brand-mark">SIMBIOSIA</span>
+          <img src="/simbiosia-logo.svg" alt="Simbiosia" className="brand-logo" />
           <span className="brand-caption">
             RAIO-X FAROL · {tipo === 'executivo' ? 'EXECUTIVO' : 'EMPRESA'}
           </span>
@@ -1395,6 +1452,15 @@ function QuestionField({
         {question.required && <em>*</em>}
       </legend>
       {question.help && <small>{question.help}</small>}
+      {question.type === 'multi' && (
+        <small className="selection-help">
+          Selecione uma ou mais opções
+          {question.maxSelections ? ` (até ${question.maxSelections})` : ''}.
+          {selected.length > 0
+            ? ` ${selected.length} selecionada${selected.length === 1 ? '' : 's'}.`
+            : ''}
+        </small>
+      )}
       <div className="option-grid">
         {question.options?.map((option) => {
           const active =
