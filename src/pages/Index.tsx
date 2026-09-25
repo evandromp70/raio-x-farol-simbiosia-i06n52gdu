@@ -53,6 +53,14 @@ function createRaioxPdf(report: Report) {
   }
   const logoWidth = 62
   const logoHeight = (logoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
+  const logoBase64 = SIMBIOSIA_PDF_LOGO_PNG.replace(/^data:image\/png;base64,/, '')
+  const logoBytes = Uint8Array.from(atob(logoBase64), (char) => char.charCodeAt(0))
+  const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
+  if (pngSignature.some((byte, index) => logoBytes[index] !== byte)) {
+    throw new Error(
+      `Logomarca inválida antes de gerar o PDF (assinatura PNG incorreta; ${logoBase64.length} caracteres base64).`,
+    )
+  }
   doc.addImage(
     SIMBIOSIA_PDF_LOGO_PNG,
     'PNG',
