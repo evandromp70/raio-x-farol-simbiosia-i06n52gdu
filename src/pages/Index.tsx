@@ -9,6 +9,11 @@ import {
   Sparkles,
 } from 'lucide-react'
 import jsPDF from 'jspdf'
+import {
+  SIMBIOSIA_PDF_LOGO_HEIGHT,
+  SIMBIOSIA_PDF_LOGO_PNG,
+  SIMBIOSIA_PDF_LOGO_WIDTH,
+} from '@/services/simbiosiaLogo'
 import { submitRaiox, RaioxTipo } from '@/services/raiox'
 
 type Answer = string | string[]
@@ -46,32 +51,18 @@ function createRaioxPdf(report: Report) {
     doc.text(lines, margin, y)
     y += lines.length * (size * 0.45) + gap
   }
-  try {
-    const canvas = document.createElement('canvas')
-    const scale = 4
-    canvas.width = 500 * scale
-    canvas.height = 111 * scale
-    const ctx = canvas.getContext('2d')
-    if (!ctx) throw new Error('sem canvas')
-    ctx.scale(scale, scale)
-    ctx.fillStyle = '#10454f'
-    ctx.font = '700 58px Arial, Helvetica, sans-serif'
-    ctx.textBaseline = 'alphabetic'
-    const word = 'SIMBIOSI'
-    ctx.fillText(word, 2, 80)
-    const w = ctx.measureText(word).width
-    ctx.save()
-    ctx.translate(w + 12 + 29, 80)
-    ctx.transform(1, 0, -0.32, 1, 0, 0)
-    ctx.fillText('Λ', -29, 0)
-    ctx.restore()
-    doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, 10, 62, 13.8)
-  } catch {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(17)
-    doc.setTextColor(16, 69, 79)
-    doc.text('SIMBIOSIA', margin, 20)
-  }
+  const logoWidth = 62
+  const logoHeight = (logoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
+  doc.addImage(
+    SIMBIOSIA_PDF_LOGO_PNG,
+    'PNG',
+    margin,
+    10,
+    logoWidth,
+    logoHeight,
+    'simbiosia-official',
+    'FAST',
+  )
   y = 36
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(22)
