@@ -73,24 +73,24 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const stageReading = (key, score) => {
     if (key === 'F')
       return score >= 75
-        ? 'A dor, a rotina e o resultado desejado estão suficientemente claros para escolher uma primeira aplicação.'
+        ? 'A dor, a rotina e o resultado desejado estão suficientemente claros para planejar uma primeira aplicação; isso não autoriza um teste.'
         : score >= 50
           ? 'Existe uma direção, mas ainda é preciso estreitar o problema e definir melhor o resultado.'
           : 'O interesse em IA ainda está mais amplo que uma oportunidade concreta. Comece por uma rotina ou processo específico.'
     if (key === 'A')
       return score >= 75
-        ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação. Confirme permissões e regras antes de testar.'
+        ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação. Confirme permissões e regras antes de qualquer teste.'
         : score >= 50
           ? 'Parte do contexto existe, mas informações espalhadas ou regras pouco claras aumentam o esforço e o risco.'
           : 'Antes de aplicar IA, será necessário organizar fontes, documentos, dados ou permissões.'
     if (key === 'R')
       return score >= 75
-        ? 'A rotina é recorrente e suficientemente visível para ser melhorada e medida.'
+        ? 'A rotina é recorrente e suficientemente visível para ser melhorada e medida; confirme responsáveis e condições antes de testar.'
         : score >= 50
           ? 'O fluxo é reconhecível, mas há etapas, responsáveis ou indicadores que ainda precisam ser explicitados.'
           : 'Ainda não há uma visão clara do trabalho real. Automatizar agora pode apenas acelerar a desorganização.'
     return score >= 75
-      ? 'Há sinais operacionais favoráveis para planejar um teste. Confirme autorizações, disponibilidade e revisão humana antes de executar.'
+      ? 'Há sinais operacionais favoráveis para planejar um teste. Confirme autorizações, disponibilidade e revisão humana antes de executar; esta nota não é uma autorização.'
       : score >= 50
         ? 'Há potencial de aplicação, mas é preciso garantir apoio, tempo, acesso ou revisão humana.'
         : 'A próxima decisão deve ser preparar condições de uso antes de implantar uma solução.'
