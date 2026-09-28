@@ -161,7 +161,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       mensalmente: 7,
       sem_frequencia: 3,
     })
-    F += arr('E-F4').some((value) => value !== 'nao_sei') ? 20 : 0
+    F += arr('E-F4').length > 0 && !has('E-F4', 'nao_sei') ? 20 : 0
     F += Math.min(
       15,
       arr('E-F5').reduce((sum, value) => sum + (value === 'outro' ? 2 : 5), 0),
