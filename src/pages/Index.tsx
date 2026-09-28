@@ -109,9 +109,9 @@ function createRaioxPdf(report: Report) {
   addText(report.nextProduct, 14, [16, 69, 79], 3)
   addText(report.routingExplanation, 10, [80, 98, 102], 6)
   addText(
-    report.band === 'Pronto para um primeiro teste'
-      ? 'Importante: uma base favorável não autoriza iniciar um piloto. Confira as condições abaixo.'
-      : 'A prontidão é diferente da recomendação comercial: confira as condições antes de executar qualquer piloto.',
+    report.band === 'Base favorável nos quatro eixos'
+      ? 'Importante: uma base favorável nos eixos não autoriza iniciar um piloto. Confira e resolva as condições abaixo.'
+      : 'A prontidão é diferente da recomendação comercial: confira e resolva as condições antes de executar qualquer piloto.',
     9,
     [80, 98, 102],
     7,

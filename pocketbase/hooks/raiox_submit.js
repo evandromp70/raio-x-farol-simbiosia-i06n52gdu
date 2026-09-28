@@ -69,7 +69,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     return values.indexOf(unknownCode) >= 0 ? 5 : 10
   }
   const stageState = (score) =>
-    score >= 75 ? 'Pronto para avançar' : score >= 50 ? 'Em preparação' : 'Ainda precisa de base'
+    score >= 75 ? 'Base estruturada' : score >= 50 ? 'Em preparação' : 'Precisa de base'
   const stageReading = (key, score) => {
     if (key === 'F')
       return score >= 75
@@ -79,7 +79,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
           : 'O interesse em IA ainda está mais amplo que uma oportunidade concreta. Comece por uma rotina ou processo específico.'
     if (key === 'A')
       return score >= 75
-        ? 'Há contexto, fontes e materiais suficientes para iniciar um teste com cuidado.'
+        ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação. Confirme permissões e regras antes de testar.'
         : score >= 50
           ? 'Parte do contexto existe, mas informações espalhadas ou regras pouco claras aumentam o esforço e o risco.'
           : 'Antes de aplicar IA, será necessário organizar fontes, documentos, dados ou permissões.'
@@ -90,7 +90,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
           ? 'O fluxo é reconhecível, mas há etapas, responsáveis ou indicadores que ainda precisam ser explicitados.'
           : 'Ainda não há uma visão clara do trabalho real. Automatizar agora pode apenas acelerar a desorganização.'
     return score >= 75
-      ? 'Existem condições para testar uma aplicação pequena com responsável, tempo e revisão.'
+      ? 'Há sinais operacionais favoráveis para planejar um teste. Confirme autorizações, disponibilidade e revisão humana antes de executar.'
       : score >= 50
         ? 'Há potencial de aplicação, mas é preciso garantir apoio, tempo, acesso ou revisão humana.'
         : 'A próxima decisão deve ser preparar condições de uso antes de implantar uma solução.'
@@ -546,7 +546,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const minScore = Math.min(F, A, R, O)
   const band =
     minScore >= 75
-      ? 'Pronto para um primeiro teste'
+      ? 'Base favorável nos quatro eixos'
       : overall >= 50
         ? 'Em preparação'
         : 'Ainda no início'
@@ -724,15 +724,15 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
           'Escolha uma ocorrência real da rotina indicada e registre entrada, etapas e saída.',
           'Separe os documentos ou informações usados nessa ocorrência e marque o que é sensível.',
           'Meça o tempo gasto e o ponto de maior retrabalho.',
-          'Teste uma aplicação simples de IA apenas com informação autorizada.',
-          'Revise o resultado, registre o que funcionou e decida se vale repetir.',
+          'Antes de qualquer teste, confirme ferramenta aprovada, autorização, informação permitida, revisão humana e tempo disponível.',
+          'Depois dessas confirmações, planeje um teste pequeno e reversível; não use o resultado como decisão sem revisão.',
         ]
       : [
           'Confirme o processo prioritário, o patrocinador e o responsável operacional.',
           'Desenhe o fluxo atual em poucas etapas e marque esperas, retrabalho e passagens de mão.',
           'Liste as fontes oficiais e os dados que podem ser usados no teste.',
           'Escolha um indicador de linha de base e faça uma primeira medição.',
-          'Defina um piloto pequeno, reversível e com revisão humana.',
+          'Antes de iniciar um piloto, resolva as condições listadas; depois planeje um teste pequeno, reversível e com revisão humana.',
         ]
   const avoid =
     tipo === 'executivo'
@@ -772,9 +772,9 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       description: bottleneckText[bottleneck],
     },
     scenario:
-      'A avaliação indica: ' +
-      band.toLowerCase() +
-      '. O próximo passo deve respeitar o ponto mais frágil do percurso, em vez de começar pela ferramenta mais sofisticada.',
+      'Leitura FAROL: ' +
+      band +
+      '. A prontidão nos quatro eixos não é autorização para testar; a recomendação comercial e as condições de execução são apresentadas separadamente.',
     firstValue,
     sevenDayPlan,
     measurement: indicador,
