@@ -622,6 +622,8 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       addPilotCondition('Reservar tempo e definir responsável antes de iniciar um teste.')
     if (executiveSafety.review === 'dificuldade' || executiveSafety.review === 'nao_sei')
       addSafetyAlert('Definir revisão humana adequada antes de usar resultados da IA.')
+    if (get('E-A6') && get('E-A6') !== 'regras_claras')
+      addSafetyAlert('Definir regras de uso de IA para informações da empresa antes do teste.')
     if (executiveSafety.impact === 'diretamente' || executiveSafety.impact === 'indiretamente')
       addSafetyAlert(
         'O erro pode afetar pessoas, clientes, dinheiro ou decisões; usar revisão humana e teste reversível.',
@@ -686,7 +688,9 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     )
   if (!safetyAlerts.length && tipo === 'empresa')
     safetyAlerts.push(
-      'Ainda é necessário validar a qualidade dos dados e os controles aplicáveis ao processo.',
+      arr('C-O7').indexOf('nenhuma') >= 0
+        ? 'Nenhum bloqueio declarado; validar dados e controles na primeira conversa.'
+        : 'Ainda é necessário validar a qualidade dos dados e os controles aplicáveis ao processo.',
     )
   const pilotBlocked =
     (tipo === 'empresa' &&
@@ -768,12 +772,20 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       description: bottleneckText[bottleneck],
     },
     scenario:
-      'A avaliação indica ' +
+      'A avaliação indica: ' +
       band.toLowerCase() +
       '. O próximo passo deve respeitar o ponto mais frágil do percurso, em vez de começar pela ferramenta mais sofisticada.',
     firstValue,
     sevenDayPlan,
     measurement: indicador,
+    context: {
+      rotina: tipo === 'executivo' ? pretty(get('E-F2')) : '',
+      mudancaDesejada: tipo === 'executivo' ? String(get('E-F6') || '').trim() : '',
+      processo: tipo === 'empresa' ? String(get('C-F3') || '').trim() : '',
+      fluxoAtual: tipo === 'empresa' ? String(get('C-R7') || '').trim() : '',
+      porQueAgora: tipo === 'empresa' ? String(get('C-F6') || '').trim() : '',
+      criterioSucesso: tipo === 'empresa' ? String(get('C-O8') || '').trim() : '',
+    },
     avoid,
     nextProduct,
     routingExplanation,

@@ -80,6 +80,12 @@ function createRaioxPdf(report: Report) {
   addText('L — Liberação de Valor · Prontidão para liberar valor com IA', 10, [80, 98, 102], 9)
   addText(`Nome: ${report.nome}`, 10, [23, 59, 66], 3)
   if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [23, 59, 66], 3)
+  addText(
+    `Contexto: ${report.tipo === 'executivo' ? 'Minha rotina profissional' : 'Minha empresa'}`,
+    10,
+    [80, 98, 102],
+    3,
+  )
   addText(`Cenário atual: ${report.band}`, 14, [16, 69, 79], 7)
   addText(report.scenario, 10, [80, 98, 102], 8)
   doc.setFont('helvetica', 'bold')
@@ -98,10 +104,49 @@ function createRaioxPdf(report: Report) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
+  doc.text('Recomendação FAROL', margin, y)
+  y += 8
+  addText(report.nextProduct, 14, [16, 69, 79], 3)
+  addText(report.routingExplanation, 10, [80, 98, 102], 6)
+  addText(
+    report.band === 'Pronto para um primeiro teste'
+      ? 'Importante: uma base favorável não autoriza iniciar um piloto. Confira as condições abaixo.'
+      : 'A prontidão é diferente da recomendação comercial: confira as condições antes de executar qualquer piloto.',
+    9,
+    [80, 98, 102],
+    7,
+  )
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
+  doc.text('Condições antes de qualquer piloto', margin, y)
+  y += 8
+  addText(`Status: ${report.pilotStatus}`, 10, [23, 59, 66], 4)
+  report.pilotConditions.forEach((item) => addText(`• ${item}`, 9, [23, 59, 66], 3))
+  if (report.safetyAlerts.length > 0) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(13)
+    doc.setTextColor(16, 69, 79)
+    doc.text('Segurança e revisão', margin, y)
+    y += 7
+    report.safetyAlerts.forEach((item) => addText(`• ${item}`, 9, [23, 59, 66], 3))
+    y += 2
+  }
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.setTextColor(16, 69, 79)
   doc.text('L — Liberação de Valor', margin, y)
   y += 8
   addText(`O valor que já pode ser liberado: ${report.firstValue}`, 10, [23, 59, 66], 5)
   addText(`Principal trava: ${report.bottleneck.description}.`, 10, [23, 59, 66], 5)
+  if (report.tipo === 'executivo' && report.context.mudancaDesejada)
+    addText(`O que você gostaria de mudar: ${report.context.mudancaDesejada}`, 10, [23, 59, 66], 5)
+  if (report.tipo === 'empresa' && report.context.porQueAgora)
+    addText(`Por que agora: ${report.context.porQueAgora}`, 10, [23, 59, 66], 5)
+  if (report.tipo === 'empresa' && report.context.fluxoAtual)
+    addText(`Fluxo descrito: ${report.context.fluxoAtual}`, 9, [80, 98, 102], 5)
+  if (report.tipo === 'empresa' && report.context.criterioSucesso)
+    addText(`Critério de sucesso informado: ${report.context.criterioSucesso}`, 9, [80, 98, 102], 5)
   addText(`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5)
   addText(`Medição inicial: ${report.measurement}.`, 10, [23, 59, 66], 7)
   doc.setFont('helvetica', 'bold')
@@ -119,6 +164,7 @@ function createRaioxPdf(report: Report) {
   y += 8
   report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
   addText(`Próximo produto recomendado: ${report.nextProduct}`, 12, [16, 69, 79], 7)
+  addText(report.textHeuristic, 8, [80, 98, 102], 4)
   addText(report.limitations, 8, [80, 98, 102], 4)
   return doc.output('datauristring')
 }
@@ -680,14 +726,15 @@ const companySections: Array<{
       },
       {
         id: 'C-F3',
-        label: 'Qual processo você gostaria de analisar primeiro?',
+        label: 'Qual processo específico você gostaria de analisar primeiro?',
         type: 'text',
-        help: 'Ex.: atendimento de dúvidas do RH, acompanhamento de propostas ou cobrança de clientes.',
+        help: 'Descreva uma rotina ou fluxo concreto. Ex.: registrar um pedido, aprovar uma despesa ou acompanhar uma proposta. Evite responder apenas “melhorar vendas”, “comunicação” ou “usar IA”.',
         required: true,
       },
       {
         id: 'C-F4',
-        label: 'Quem é mais afetado pelo problema?',
+        label: 'Quais grupos são mais afetados pelo problema?',
+        help: 'Selecione grupos de pessoas, não áreas funcionais; isso ajuda a separar o alcance do problema da transversalidade entre áreas.',
         type: 'multi',
         required: true,
         maxSelections: 3,
@@ -724,6 +771,7 @@ const companySections: Array<{
       {
         id: 'C-F6',
         label: 'Por que essa dor precisa ser tratada agora?',
+        help: 'Se ainda não houver urgência ou impacto validado, diga isso. Essa resposta informa a conversa, mas não bloqueia uma recomendação FAROL Empresa quando área, dor e processo estão claros.',
         type: 'text',
         required: true,
       },
@@ -879,7 +927,7 @@ const companySections: Array<{
       },
       {
         id: 'C-R3',
-        label: 'Quantas áreas ou pessoas participam?',
+        label: 'Quantas áreas funcionais distintas participam do processo?',
         type: 'single',
         required: true,
         options: [

@@ -20,9 +20,23 @@ export type RaioxResponse = {
     firstValue: string
     sevenDayPlan: string[]
     measurement: string
+    context: {
+      rotina: string
+      mudancaDesejada: string
+      processo: string
+      fluxoAtual: string
+      porQueAgora: string
+      criterioSucesso: string
+    }
     avoid: string[]
     nextProduct: string
+    routingExplanation: string
+    pilotStatus: string
+    pilotConditions: string[]
+    safetyAlerts: string[]
+    textHeuristic: string
     limitations: string
+    version: string
   }
 }
 
