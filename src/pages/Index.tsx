@@ -1530,12 +1530,16 @@ function QuestionField({
               onClick={() => {
                 if (question.type === 'multi') {
                   const values = selected as string[]
-                  onChange(
-                    question.id,
-                    values.includes(option.value)
-                      ? values.filter((item) => item !== option.value)
-                      : [...values, option.value],
-                  )
+                  const exclusive = question.id === 'E-F4' ? 'nao_sei' : ''
+                  let next = values.includes(option.value)
+                    ? values.filter((item) => item !== option.value)
+                    : [...values, option.value]
+                  if (exclusive && option.value === exclusive) {
+                    next = next.indexOf(exclusive) >= 0 ? [exclusive] : []
+                  } else if (exclusive) {
+                    next = next.filter((item) => item !== exclusive)
+                  }
+                  onChange(question.id, next)
                 } else onChange(question.id, option.value)
               }}
             >
