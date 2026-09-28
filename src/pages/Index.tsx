@@ -34,6 +34,26 @@ function createRaioxPdf(report: Report) {
   const margin = 18
   const width = 210 - margin * 2
   let y = 20
+  const ensureSpace = (height: number) => {
+    if (y + height > 282) {
+      doc.addPage()
+      y = 20
+    }
+  }
+  const estimateTextHeight = (text: string, size: number, gap: number) => {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(size)
+    const lines = doc.splitTextToSize(String(text), width)
+    return lines.length * (size * 0.45) + gap
+  }
+  const addSectionHeading = (text: string, size = 15, gap = 8) => {
+    ensureSpace(size * 0.45 + gap + 7)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(size)
+    doc.setTextColor(16, 69, 79)
+    doc.text(text, margin, y)
+    y += gap
+  }
   const addText = (
     text: string,
     size = 10,
@@ -44,10 +64,7 @@ function createRaioxPdf(report: Report) {
     doc.setFontSize(size)
     doc.setTextColor(...color)
     const lines = doc.splitTextToSize(String(text), width)
-    if (y + lines.length * (size * 0.45) + gap > 282) {
-      doc.addPage()
-      y = 20
-    }
+    ensureSpace(lines.length * (size * 0.45) + gap)
     doc.text(lines, margin, y)
     y += lines.length * (size * 0.45) + gap
   }
@@ -124,35 +141,46 @@ function createRaioxPdf(report: Report) {
     report.safetyAlerts.forEach((item) => addText(`• ${item}`, 9, [23, 59, 66], 3))
     y += 2
   }
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('L — Liberação de Valor', margin, y)
-  y += 8
-  addText(`Primeira ação: ${report.firstValue}`, 10, [23, 59, 66], 5)
+  const liberationItems: Array<[string, number, [number, number, number], number]> = [
+    [`Primeira ação: ${report.firstValue}`, 10, [23, 59, 66], 5],
+  ]
   if (report.tipo === 'executivo' && report.context.mudancaDesejada)
-    addText(`O que você gostaria de mudar: ${report.context.mudancaDesejada}`, 10, [23, 59, 66], 5)
+    liberationItems.push([
+      `O que você gostaria de mudar: ${report.context.mudancaDesejada}`,
+      10,
+      [23, 59, 66],
+      5,
+    ])
   if (report.tipo === 'empresa' && report.context.porQueAgora)
-    addText(`Por que agora: ${report.context.porQueAgora}`, 10, [23, 59, 66], 5)
+    liberationItems.push([`Por que agora: ${report.context.porQueAgora}`, 10, [23, 59, 66], 5])
   if (report.tipo === 'empresa' && report.context.fluxoAtual)
-    addText(`Fluxo descrito: ${report.context.fluxoAtual}`, 9, [80, 98, 102], 5)
+    liberationItems.push([`Fluxo descrito: ${report.context.fluxoAtual}`, 9, [80, 98, 102], 5])
   if (report.tipo === 'empresa' && report.context.criterioSucesso)
-    addText(`Critério de sucesso informado: ${report.context.criterioSucesso}`, 9, [80, 98, 102], 5)
-  addText(`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5)
-  addText(`Resultado a acompanhar: ${report.measurement}.`, 10, [23, 59, 66], 7)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('Próximas ações', margin, y)
-  y += 8
+    liberationItems.push([
+      `Critério de sucesso informado: ${report.context.criterioSucesso}`,
+      9,
+      [80, 98, 102],
+      5,
+    ])
+  liberationItems.push(
+    [`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5],
+    [`Resultado a acompanhar: ${report.measurement}.`, 10, [23, 59, 66], 7],
+  )
+  const liberationHeight =
+    15 * 0.45 +
+    8 +
+    liberationItems.reduce(
+      (total, [text, size, _color, gap]) => total + estimateTextHeight(text, size, gap),
+      0,
+    )
+  ensureSpace(liberationHeight)
+  addSectionHeading('L — Liberação de Valor')
+  liberationItems.forEach(([text, size, color, gap]) => addText(text, size, color, gap))
+  addSectionHeading('Próximas ações')
   report.sevenDayPlan.forEach((item, index) =>
     addText(`${index + 1}. ${item}`, 10, [23, 59, 66], 3),
   )
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('Cuidados para esta etapa', margin, y)
-  y += 8
+  addSectionHeading('Cuidados para esta etapa')
   report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
 
   addText(report.limitations, 8, [80, 98, 102], 4)
