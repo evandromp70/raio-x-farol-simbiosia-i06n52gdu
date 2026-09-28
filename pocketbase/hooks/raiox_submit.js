@@ -843,7 +843,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     esc(nome) +
     '.</p><p>Este é o seu relatório de <strong>Liberação de Valor</strong>, o L do Método FAROL. Ele organiza os próximos passos a partir das informações que você compartilhou.</p>' +
     '<div style="background:#f3f8f7;padding:18px;border-left:4px solid #bde038;margin:20px 0;"><div style="font-size:12px;letter-spacing:1px;color:#506266;text-transform:uppercase;">Próximo passo</div><div style="font-size:22px;font-weight:bold;margin-top:5px;color:#10454f;">' +
-    esc(band) +
+    esc(nextProduct) +
     '</div></div>' +
     '<h2 style="font-size:18px;color:#10454f;">Seu FAROL</h2><table style="border-collapse:collapse;width:100%;font-size:14px;">' +
     stageHtml +
@@ -855,13 +855,13 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     '.</p><p><strong>Resultado a acompanhar:</strong> ' +
     esc(indicador) +
     '.</p>' +
-    '<h3 style="font-size:16px;color:#10454f;">Próximos sete dias</h3><ol>' +
+    '<h3 style="font-size:16px;color:#10454f;">Próximas ações</h3><ol>' +
     stepsHtml +
     '</ol>' +
-    '<h3 style="font-size:16px;color:#10454f;">Ainda não faça</h3><ul>' +
+    '<h3 style="font-size:16px;color:#10454f;">Cuidados para esta etapa</h3><ul>' +
     avoidHtml +
     '</ul>' +
-    '<div style="background:#10454f;color:#ffffff;padding:18px;margin-top:24px;"><strong>Próximo produto recomendado</strong><div style="font-size:20px;color:#bde038;margin-top:5px;">' +
+    '<div style="background:#10454f;color:#ffffff;padding:18px;margin-top:24px;"><strong>Próximo passo recomendado</strong><div style="font-size:20px;color:#bde038;margin-top:5px;">' +
     esc(nextProduct) +
     '</div><p style="margin:8px 0 0;color:#ffffff;">' +
     esc(routingExplanation) +
