@@ -16,7 +16,7 @@ export type RaioxResponse = {
     primeiraAplicacao: string
     stages: Array<{ key: string; title: string; score: number; state: string; reading: string }>
     bottleneck: { key: string; title: string; description: string }
-    scenario: string
+
     firstValue: string
     sevenDayPlan: string[]
     measurement: string
@@ -34,7 +34,7 @@ export type RaioxResponse = {
     pilotStatus: string
     pilotConditions: string[]
     safetyAlerts: string[]
-    textHeuristic: string
+
     limitations: string
     version: string
   }

@@ -86,8 +86,7 @@ function createRaioxPdf(report: Report) {
     [80, 98, 102],
     3,
   )
-  addText(`Cenário atual: ${report.band}`, 14, [16, 69, 79], 7)
-  addText(report.scenario, 10, [80, 98, 102], 8)
+
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
@@ -104,18 +103,11 @@ function createRaioxPdf(report: Report) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
-  doc.text('Recomendação FAROL', margin, y)
+  doc.text('Próximo passo recomendado', margin, y)
   y += 8
   addText(report.nextProduct, 14, [16, 69, 79], 3)
   addText(report.routingExplanation, 10, [80, 98, 102], 6)
-  addText(
-    report.band === 'Base favorável nos quatro eixos'
-      ? 'Importante: uma base favorável nos eixos não autoriza iniciar um piloto. Confira e resolva as condições abaixo.'
-      : 'A prontidão é diferente da recomendação comercial: confira e resolva as condições antes de executar qualquer piloto.',
-    9,
-    [80, 98, 102],
-    7,
-  )
+
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
@@ -137,8 +129,7 @@ function createRaioxPdf(report: Report) {
   doc.setTextColor(16, 69, 79)
   doc.text('L — Liberação de Valor', margin, y)
   y += 8
-  addText(`O valor que já pode ser liberado: ${report.firstValue}`, 10, [23, 59, 66], 5)
-  addText(`Principal trava: ${report.bottleneck.description}.`, 10, [23, 59, 66], 5)
+  addText(`Primeira ação: ${report.firstValue}`, 10, [23, 59, 66], 5)
   if (report.tipo === 'executivo' && report.context.mudancaDesejada)
     addText(`O que você gostaria de mudar: ${report.context.mudancaDesejada}`, 10, [23, 59, 66], 5)
   if (report.tipo === 'empresa' && report.context.porQueAgora)
@@ -148,11 +139,11 @@ function createRaioxPdf(report: Report) {
   if (report.tipo === 'empresa' && report.context.criterioSucesso)
     addText(`Critério de sucesso informado: ${report.context.criterioSucesso}`, 9, [80, 98, 102], 5)
   addText(`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5)
-  addText(`Medição inicial: ${report.measurement}.`, 10, [23, 59, 66], 7)
+  addText(`Resultado a acompanhar: ${report.measurement}.`, 10, [23, 59, 66], 7)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
-  doc.text('Próximos sete dias', margin, y)
+  doc.text('Próximas ações', margin, y)
   y += 8
   report.sevenDayPlan.forEach((item, index) =>
     addText(`${index + 1}. ${item}`, 10, [23, 59, 66], 3),
@@ -160,11 +151,10 @@ function createRaioxPdf(report: Report) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
-  doc.text('Ainda não faça', margin, y)
+  doc.text('Cuidados para esta etapa', margin, y)
   y += 8
   report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
-  addText(`Próximo produto recomendado: ${report.nextProduct}`, 12, [16, 69, 79], 7)
-  addText(report.textHeuristic, 8, [80, 98, 102], 4)
+
   addText(report.limitations, 8, [80, 98, 102], 4)
   return doc.output('datauristring')
 }

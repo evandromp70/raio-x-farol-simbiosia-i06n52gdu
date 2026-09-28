@@ -69,28 +69,28 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     return values.indexOf(unknownCode) >= 0 ? 5 : 10
   }
   const stageState = (score) =>
-    score >= 75 ? 'Base estruturada' : score >= 50 ? 'Em preparação' : 'Precisa de base'
+    score >= 75 ? 'Bem encaminhado' : score >= 50 ? 'A estruturar' : 'Prioridade de desenvolvimento'
   const stageReading = (key, score) => {
     if (key === 'F')
       return score >= 75
-        ? 'A dor, a rotina e o resultado desejado estão suficientemente claros para planejar uma primeira aplicação; isso não autoriza um teste.'
+        ? 'A dor, a rotina e o resultado desejado estão suficientemente claros para planejar uma primeira aplicação.'
         : score >= 50
           ? 'Existe uma direção, mas ainda é preciso estreitar o problema e definir melhor o resultado.'
           : 'O interesse em IA ainda está mais amplo que uma oportunidade concreta. Comece por uma rotina ou processo específico.'
     if (key === 'A')
       return score >= 75
-        ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação. Confirme permissões e regras antes de qualquer teste.'
+        ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação.'
         : score >= 50
           ? 'Parte do contexto existe, mas informações espalhadas ou regras pouco claras aumentam o esforço e o risco.'
           : 'Antes de aplicar IA, será necessário organizar fontes, documentos, dados ou permissões.'
     if (key === 'R')
       return score >= 75
-        ? 'A rotina é recorrente e suficientemente visível para ser melhorada e medida; confirme responsáveis e condições antes de testar.'
+        ? 'A rotina é recorrente e suficientemente visível para ser melhorada e medida.'
         : score >= 50
           ? 'O fluxo é reconhecível, mas há etapas, responsáveis ou indicadores que ainda precisam ser explicitados.'
           : 'Ainda não há uma visão clara do trabalho real. Automatizar agora pode apenas acelerar a desorganização.'
     return score >= 75
-      ? 'Há sinais operacionais favoráveis para planejar um teste. Confirme autorizações, disponibilidade e revisão humana antes de executar; esta nota não é uma autorização.'
+      ? 'Há condições operacionais favoráveis. Confirme os requisitos abaixo antes de qualquer teste.'
       : score >= 50
         ? 'Há potencial de aplicação, mas é preciso garantir apoio, tempo, acesso ou revisão humana.'
         : 'A próxima decisão deve ser preparar condições de uso antes de implantar uma solução.'
@@ -132,8 +132,43 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       rotina_comercial: 'uma rotina comercial',
       rotina_financeira: 'uma rotina financeira',
       rotina_pessoas: 'uma rotina de pessoas',
+      resposta: 'tempo de resposta',
+      erros: 'erros e qualidade',
+      tarefas: 'tarefas concluídas',
+      oportunidades: 'acompanhamento de oportunidades',
+      decisoes: 'agilidade nas decisões',
+      qualidade: 'qualidade do resultado',
+      experiencia: 'experiência de clientes ou equipe',
+      retrabalho: 'retrabalho',
+      conversao: 'conversão comercial',
+      atendimento: 'atendimento ao colaborador',
+      caixa: 'previsibilidade de caixa',
+      atrasos: 'atrasos e perdas financeiras',
+      decisao: 'qualidade das decisões',
+      outro: 'outro resultado',
     }
     return labels[value] || String(value || '').replace(/_/g, ' ')
+  }
+  const readableIndicators = (values, fallback) => {
+    const labels = {
+      horas: 'horas de trabalho manual',
+      resposta: 'tempo de resposta',
+      erros: 'erros e qualidade',
+      tarefas: 'tarefas concluídas',
+      oportunidades: 'acompanhamento de oportunidades',
+      decisoes: 'agilidade nas decisões',
+      qualidade: 'qualidade do resultado',
+      experiencia: 'experiência de clientes ou equipe',
+      retrabalho: 'retrabalho',
+      conversao: 'conversão comercial',
+      atendimento: 'atendimento ao colaborador',
+      caixa: 'previsibilidade de caixa',
+      atrasos: 'atrasos e perdas financeiras',
+      decisao: 'qualidade das decisões',
+      outro: 'outro resultado',
+    }
+    const result = values.map((value) => labels[value] || pretty(value)).filter(Boolean)
+    return result.length ? result.join(', ') : fallback
   }
 
   let F = 0
@@ -333,10 +368,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
 
     foco = pretty(get('E-F2'))
     primeiraAplicacao = foco
-    indicador =
-      arr('E-F5')
-        .map((item) => pretty(item))
-        .join(', ') || 'tempo, volume ou qualidade da rotina'
+    indicador = readableIndicators(arr('E-F5'), 'tempo, volume ou qualidade da rotina')
     apoio = pretty(get('E-O7'))
   } else {
     F += get('C-F1') && get('C-F1') !== 'outra' ? 15 : 0
@@ -525,10 +557,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
 
     foco = pretty(get('C-F2'))
     primeiraAplicacao = foco
-    indicador =
-      arr('C-F5')
-        .map((item) => pretty(item))
-        .join(', ') || 'tempo, volume, qualidade ou resultado financeiro'
+    indicador = readableIndicators(arr('C-F5'), 'tempo, volume, qualidade ou resultado financeiro')
     apoio = 'uma equipe responsável e um patrocinador do piloto'
   }
 
@@ -543,23 +572,16 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     if (stageScores[key] < stageScores[bottleneck]) bottleneck = key
   })
   const overall = Math.round((F + A + R + O) / 4)
-  const minScore = Math.min(F, A, R, O)
-  const band =
-    minScore >= 75
-      ? 'Base favorável nos quatro eixos'
-      : overall >= 50
-        ? 'Em preparação'
-        : 'Ainda no início'
   let nextProduct = 'FAROL Essencial'
   let routingExplanation =
-    'O FAROL Essencial é o próximo passo para delimitar melhor uma primeira aplicação.'
+    'O FAROL Essencial ajuda a delimitar uma dor e uma rotina ou processo antes de escolher uma aplicação.'
   let isCrossFunctional = false
   if (tipo === 'executivo') {
     const executiveSpecific = F >= 90 && get('E-F1') !== 'outro' && get('E-F2') !== 'outra'
     if (executiveSpecific && A >= 75 && R >= 75 && O >= 75) {
       nextProduct = 'FAROL Executivo'
       routingExplanation =
-        'Foco profissional específico e eixos de prontidão suficientes para considerar o percurso executivo. Confirme condições de uso antes de testar.'
+        'Você descreveu uma rotina profissional específica. O FAROL Executivo é o próximo passo para aprofundar essa aplicação; as condições de uso ainda precisam ser confirmadas.'
     }
   } else {
     const businessSpecific =
@@ -583,28 +605,28 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     if (isCrossFunctional) {
       nextProduct = 'FAROL Mapa IA'
       routingExplanation =
-        'O processo definido atravessa várias áreas e públicos; o FAROL Mapa IA ajuda a delimitar a intervenção transversal.'
+        'O processo envolve várias áreas e públicos. O FAROL Mapa IA ajuda a delimitar o trabalho conjunto entre essas áreas.'
     } else if (businessSpecific) {
       nextProduct = 'FAROL Empresa'
       routingExplanation =
-        'Há uma área, uma dor e um processo empresarial específicos para uma conversa. A prontidão para piloto e suas autorizações são tratadas separadamente.'
+        'Você descreveu uma área, uma dor e um processo definidos. O FAROL Empresa é o próximo passo para aprofundar o diagnóstico e avaliar as condições de qualquer projeto.'
     }
   }
 
   const bottleneckText = {
-    F: 'transformar o interesse em uma dor, rotina e resultado claramente definidos',
-    A: 'organizar as informações, fontes e regras necessárias para trabalhar com segurança',
-    R: 'tornar o processo visível, repetível e mensurável antes de automatizar',
-    O: 'garantir responsável, tempo, acesso, apoio e revisão humana para testar uma mudança',
+    F: 'definir com mais precisão o problema e o resultado esperado',
+    A: 'organizar as informações, as fontes e as regras de acesso',
+    R: 'descrever as etapas do processo e definir como medir o resultado',
+    O: 'combinar responsáveis, tempo, acessos e revisão humana',
   }
   const firstValue =
     bottleneck === 'F'
-      ? 'Escolha uma única rotina ou processo e descreva, em uma frase, o problema e o resultado que precisa melhorar.'
+      ? 'Descreva o problema prioritário e o resultado que precisa melhorar.'
       : bottleneck === 'A'
-        ? 'Reúna as três fontes mais usadas nessa rotina, identifique a fonte oficial e registre quem pode acessá-las.'
+        ? 'Identifique as principais fontes de informação, qual é a oficial e quem pode acessá-las.'
         : bottleneck === 'R'
-          ? 'Observe uma semana do processo, registre suas etapas e meça tempo, volume ou retrabalho em pelo menos uma ocorrência.'
-          : 'Defina um responsável, reserve um pequeno bloco de tempo e escolha um teste reversível com revisão humana.'
+          ? 'Registre as etapas do processo e escolha um indicador para acompanhar.'
+          : 'Alinhe responsáveis, disponibilidade, acessos e revisão humana antes de definir qualquer teste.'
   const pilotConditions = []
   const safetyAlerts = []
   const addPilotCondition = (message) => {
@@ -679,19 +701,14 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       )
     if (companySafety.dataClassificationUnknown)
       addSafetyAlert(
-        'O respondente não sabe classificar os dados; fazer essa checagem antes de qualquer uso de IA.',
+        'A classificação dos dados ainda precisa ser confirmada antes de qualquer uso de IA.',
       )
   }
   if (!pilotConditions.length)
     pilotConditions.push(
-      'Nenhum impedimento específico informado; confirmar dados, permissões, responsável e revisão humana antes de começar.',
+      'Antes de qualquer teste, confirmar disponibilidade dos dados, autorização, responsável e revisão humana.',
     )
-  if (!safetyAlerts.length && tipo === 'empresa')
-    safetyAlerts.push(
-      arr('C-O7').indexOf('nenhuma') >= 0
-        ? 'Nenhum bloqueio declarado; validar dados e controles na primeira conversa.'
-        : 'Ainda é necessário validar a qualidade dos dados e os controles aplicáveis ao processo.',
-    )
+
   const pilotBlocked =
     (tipo === 'empresa' &&
       (companyAvailability === 'aprovacao' ||
@@ -713,26 +730,25 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
         executiveSafety.impact === 'indiretamente' ||
         executiveSafety.sensitive))
   const pilotStatus = pilotBlocked
-    ? 'Piloto bloqueado ou aguardando condição prévia'
+    ? 'Não iniciar: faltam condições prévias'
     : pilotScopeLimited
-      ? 'Piloto apenas com escopo limitado ou controles adicionais'
-      : 'Condições de piloto a confirmar'
-
+      ? 'Avançar somente com escopo limitado e controles definidos'
+      : 'Validar as condições antes de qualquer teste'
   const sevenDayPlan =
     tipo === 'executivo'
       ? [
-          'Escolha uma ocorrência real da rotina indicada e registre entrada, etapas e saída.',
-          'Separe os documentos ou informações usados nessa ocorrência e marque o que é sensível.',
-          'Meça o tempo gasto e o ponto de maior retrabalho.',
-          'Antes de qualquer teste, confirme ferramenta aprovada, autorização, informação permitida, revisão humana e tempo disponível.',
-          'Depois dessas confirmações, planeje um teste pequeno e reversível; não use o resultado como decisão sem revisão.',
+          'Descreva as etapas da rotina escolhida e onde ocorre a maior dificuldade.',
+          'Liste as informações usadas e identifique quais exigem cuidado ou autorização.',
+          'Registre o tempo ou esforço envolvido em uma ocorrência.',
+          'Combine quem pode avaliar o resultado e quais regras de uso se aplicam.',
+          'Com essas informações, decida se há condições para propor um teste pequeno e reversível.',
         ]
       : [
-          'Confirme o processo prioritário, o patrocinador e o responsável operacional.',
-          'Desenhe o fluxo atual em poucas etapas e marque esperas, retrabalho e passagens de mão.',
-          'Liste as fontes oficiais e os dados que podem ser usados no teste.',
-          'Escolha um indicador de linha de base e faça uma primeira medição.',
-          'Antes de iniciar um piloto, resolva as condições listadas; depois planeje um teste pequeno, reversível e com revisão humana.',
+          'Confirme o processo prioritário e quem responde por ele.',
+          'Desenhe o fluxo atual e marque esperas, retrabalho e passagens entre áreas.',
+          'Liste as fontes de informação e as permissões necessárias.',
+          'Escolha um indicador e registre a situação atual.',
+          'Use as condições acima para decidir se cabe aprofundar o diagnóstico ou planejar um teste.',
         ]
   const avoid =
     tipo === 'executivo'
@@ -761,7 +777,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     empresa,
     generatedAt: new Date().toISOString(),
     overall,
-    band,
+    band: nextProduct,
     foco,
     primeiraAplicacao,
     apoio,
@@ -771,10 +787,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       title: stageNames[bottleneck],
       description: bottleneckText[bottleneck],
     },
-    scenario:
-      'Leitura FAROL: ' +
-      band +
-      '. A prontidão nos quatro eixos não é autorização para testar; a recomendação comercial e as condições de execução são apresentadas separadamente.',
+    scenario: '',
     firstValue,
     sevenDayPlan,
     measurement: indicador,
@@ -792,14 +805,11 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     pilotStatus,
     pilotConditions,
     safetyAlerts,
-    textHeuristic:
-      tipo === 'empresa'
-        ? 'A leitura de C-F3/C-F6 usa sinais lexicais simples; não entende o significado do texto. Use-o como pista e valide na conversa.'
-        : 'A leitura de E-F6 usa sinais lexicais simples; não entende o significado do texto. Use-o como pista e valide na conversa.',
+
     limitations:
       tipo === 'empresa'
-        ? 'Este resultado representa a percepção do respondente sobre um processo escolhido. FAROL Empresa pode ser recomendado mesmo quando o piloto ainda depende de dados, patrocínio ou aprovações. Não substitui entrevistas, análise de documentos ou diagnóstico profundo.'
-        : 'Este resultado representa a percepção do respondente sobre uma rotina profissional escolhida. A recomendação não autoriza uso de ferramentas ou dados sem aprovação. Não é avaliação de desempenho nem diagnóstico profundo.',
+        ? 'Esta autoavaliação organiza as informações fornecidas sobre o processo. A recomendação indica o próximo passo de conversa; a definição de qualquer projeto depende de diagnóstico, validação dos dados e alinhamento com a equipe.'
+        : 'Esta autoavaliação organiza as informações fornecidas sobre a rotina escolhida. A recomendação indica o próximo passo; confirme as regras de uso, os dados e a revisão humana antes de qualquer teste.',
   }
 
   const esc = (value) =>
@@ -831,22 +841,18 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     '<div style="background:#10454f;padding:28px 30px;color:#ffffff;"><div style="font-size:13px;letter-spacing:3px;font-weight:bold;color:#bde038;">SIMBIOSIA</div><h1 style="margin:10px 0 0;font-size:28px;">Raio-X FAROL</h1><p style="margin:8px 0 0;color:#e4f2f0;">Prontidão para liberar valor com IA</p></div>' +
     '<div style="padding:26px 30px;background:#ffffff;"><p>Olá, ' +
     esc(nome) +
-    '.</p><p>Este é o seu relatório de <strong>Liberação de Valor</strong>, o L do Método FAROL. Ele mostra onde você ou sua empresa pode começar e qual deve ser o próximo passo.</p>' +
-    '<div style="background:#f3f8f7;padding:18px;border-left:4px solid #bde038;margin:20px 0;"><div style="font-size:12px;letter-spacing:1px;color:#506266;text-transform:uppercase;">Cenário atual</div><div style="font-size:22px;font-weight:bold;margin-top:5px;color:#10454f;">' +
+    '.</p><p>Este é o seu relatório de <strong>Liberação de Valor</strong>, o L do Método FAROL. Ele organiza os próximos passos a partir das informações que você compartilhou.</p>' +
+    '<div style="background:#f3f8f7;padding:18px;border-left:4px solid #bde038;margin:20px 0;"><div style="font-size:12px;letter-spacing:1px;color:#506266;text-transform:uppercase;">Próximo passo</div><div style="font-size:22px;font-weight:bold;margin-top:5px;color:#10454f;">' +
     esc(band) +
-    '</div><p style="margin:8px 0 0;">' +
-    esc(report.scenario) +
-    '</p></div>' +
+    '</div></div>' +
     '<h2 style="font-size:18px;color:#10454f;">Seu FAROL</h2><table style="border-collapse:collapse;width:100%;font-size:14px;">' +
     stageHtml +
     '</table>' +
-    '<h2 style="font-size:18px;color:#10454f;margin-top:24px;">L — Liberação de Valor</h2><p><strong>Principal trava:</strong> ' +
-    esc(bottleneckText[bottleneck]) +
-    '.</p><p><strong>Primeira aplicação:</strong> ' +
-    esc(primeiraAplicacao) +
-    '.</p><p><strong>O valor que já pode ser liberado:</strong> ' +
+    '<h2 style="font-size:18px;color:#10454f;margin-top:24px;">L — Liberação de Valor</h2><p><strong>Primeira ação:</strong> ' +
     esc(firstValue) +
-    '</p><p><strong>Medição inicial:</strong> ' +
+    '</p><p><strong>Aplicação considerada:</strong> ' +
+    esc(primeiraAplicacao) +
+    '.</p><p><strong>Resultado a acompanhar:</strong> ' +
     esc(indicador) +
     '.</p>' +
     '<h3 style="font-size:16px;color:#10454f;">Próximos sete dias</h3><ol>' +
@@ -865,16 +871,13 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     '</strong></p><ul>' +
     pilotConditions.map((item) => '<li>' + esc(item) + '</li>').join('') +
     '</ul>' +
-    '<h3 style="font-size:16px;color:#10454f;">Segurança e revisão</h3><ul>' +
-    safetyAlerts.map((item) => '<li>' + esc(item) + '</li>').join('') +
-    '</ul>' +
-    '<p style="font-size:12px;color:#506266;">' +
-    esc(report.textHeuristic) +
-    '</p>' +
+    (safetyAlerts.length
+      ? '<h3 style="font-size:16px;color:#10454f;">Segurança e revisão</h3><ul>' +
+        safetyAlerts.map((item) => '<li>' + esc(item) + '</li>').join('') +
+        '</ul>'
+      : '') +
     '<p style="font-size:12px;color:#506266;margin-top:24px;">' +
     esc(report.limitations) +
-    '</p><p style="font-size:12px;color:#506266;">Relatório automático · versão ' +
-    esc(report.version) +
     '</p></div></div>'
 
   if (mode === 'prepare') {
