@@ -1427,7 +1427,7 @@ export default function Index() {
           ))}
           {step === 0 && (
             <div className="contact-block">
-              <div className="report-kicker">Para receber o L por e-mail</div>
+              <div className="report-kicker">Relatório e privacidade</div>
               <h3>Onde envio seu relatório?</h3>
               <div className="field-grid">
                 <label>
@@ -1449,8 +1449,10 @@ export default function Index() {
                 </label>
               </div>
               <p>
-                O relatório é gerado automaticamente ao final. Não é necessário falar com a
-                Simbiosia para recebê-lo.
+                Usamos seu nome e e-mail para enviar o relatório. Suas respostas são processadas
+                apenas para gerar o diagnóstico e não ficam armazenadas. Poderemos, futuramente,
+                enviar conteúdos, eventos e informações sobre a Simbiosia para o seu e-mail e você
+                poderá optar por parar de receber esses conteúdos a qualquer momento.
               </p>
             </div>
           )}
