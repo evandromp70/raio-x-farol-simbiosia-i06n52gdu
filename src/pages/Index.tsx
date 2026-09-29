@@ -40,6 +40,54 @@ function createRaioxPdf(report: Report) {
       y = 20
     }
   }
+  // Helpers visuais do PDF. Não alteram dados nem scoring.
+  const colors = {
+    teal: [16, 69, 79] as [number, number, number],
+    slate: [80, 98, 102] as [number, number, number],
+    olive: [129, 130, 116] as [number, number, number],
+    sage: [163, 171, 120] as [number, number, number],
+    lime: [189, 224, 56] as [number, number, number],
+    ink: [35, 59, 66] as [number, number, number],
+    paper: [247, 249, 248] as [number, number, number],
+    track: [234, 239, 237] as [number, number, number],
+    line: [222, 229, 227] as [number, number, number],
+    white: [255, 255, 255] as [number, number, number],
+  }
+  const axisColors = [colors.teal, colors.slate, colors.olive, colors.sage]
+  const textHeight = (text: string, size: number, maxWidth: number, bold = false) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal')
+    doc.setFontSize(size)
+    return (doc.splitTextToSize(String(text == null ? '' : text), maxWidth) as string[]).length * size * 0.46
+  }
+  const drawText = (
+    text: string,
+    x: number,
+    baseline: number,
+    maxWidth: number,
+    size: number,
+    color: [number, number, number],
+    bold = false,
+  ) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal')
+    doc.setFontSize(size)
+    doc.setTextColor(...color)
+    const lines = doc.splitTextToSize(String(text == null ? '' : text), maxWidth) as string[]
+    if (lines.length) doc.text(lines, x, baseline)
+    return lines.length * size * 0.46
+  }
+  const drawCard = (
+    x: number,
+    top: number,
+    cardWidth: number,
+    cardHeight: number,
+    fill: [number, number, number],
+    stroke: [number, number, number] = colors.line,
+  ) => {
+    doc.setFillColor(...fill)
+    doc.setDrawColor(...stroke)
+    doc.setLineWidth(0.25)
+    doc.roundedRect(x, top, cardWidth, cardHeight, 2.2, 2.2, 'FD')
+  }
   const estimateTextHeight = (text: string, size: number, gap: number) => {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(size)
@@ -53,6 +101,72 @@ function createRaioxPdf(report: Report) {
     doc.setTextColor(16, 69, 79)
     doc.text(text, margin, y)
     y += gap
+  }
+  const drawTopRule = () => {
+    doc.setFillColor(...colors.teal)
+    doc.rect(0, 0, 210, 3, 'F')
+    doc.setFillColor(...colors.lime)
+    doc.rect(0, 0, 33, 3, 'F')
+  }
+  const startContinuationPage = (section: string) => {
+    doc.addPage()
+    drawTopRule()
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(7.2)
+    doc.setTextColor(...colors.olive)
+    doc.text('RAIO-X FAROL · CONTINUAÇÃO', margin, 18)
+    doc.setFontSize(14)
+    doc.setTextColor(...colors.teal)
+    doc.text(section, margin, 28)
+    y = 36
+    return y
+  }
+  const drawSection = (text: string, top: number) => {
+    let sectionTop = top
+    if (sectionTop + 10 > 276) sectionTop = startContinuationPage(text)
+    doc.setFillColor(...colors.lime)
+    doc.roundedRect(margin, sectionTop + 0.3, 1.8, 5.5, 0.8, 0.8, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10.3)
+    doc.setTextColor(...colors.teal)
+    doc.text(text.toUpperCase(), margin + 5, sectionTop + 4.6)
+    return sectionTop + 9
+  }
+  const drawListItem = (
+    text: string,
+    top: number,
+    fill: [number, number, number] = colors.white,
+    marker: [number, number, number] = colors.sage,
+    fontSize = 8.2,
+    section = 'Continuação',
+  ) => {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(fontSize)
+    let lines = doc.splitTextToSize(String(text == null ? '' : text), width - 16) as string[]
+    if (!lines.length) lines = ['']
+    const lineHeight = fontSize * 0.46
+    let cursor = 0
+    let itemTop = top
+    while (cursor < lines.length) {
+      const availableLines = Math.floor((276 - itemTop - 6) / lineHeight)
+      if (availableLines < 1) {
+        itemTop = startContinuationPage(section)
+        continue
+      }
+      const chunk = lines.slice(cursor, cursor + availableLines)
+      const height = Math.max(10, chunk.length * lineHeight + 5.5)
+      drawCard(margin, itemTop, width, height, fill)
+      doc.setFillColor(...marker)
+      doc.circle(margin + 5.5, itemTop + height / 2, 1.2, 'F')
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(fontSize)
+      doc.setTextColor(...colors.ink)
+      doc.text(chunk, margin + 10, itemTop + 5)
+      itemTop += height + 2.2
+      cursor += chunk.length
+      if (cursor < lines.length) itemTop = startContinuationPage(`${section} · continuação`)
+    }
+    return itemTop
   }
   const addText = (
     text: string,
@@ -78,6 +192,7 @@ function createRaioxPdf(report: Report) {
       `Logomarca inválida antes de gerar o PDF (assinatura PNG incorreta; ${logoBase64.length} caracteres base64).`,
     )
   }
+  drawTopRule()
   doc.addImage(
     SIMBIOSIA_PDF_LOGO_PNG,
     'PNG',
@@ -88,155 +203,276 @@ function createRaioxPdf(report: Report) {
     'simbiosia-official',
     'FAST',
   )
-  y = 36
+  y = 38
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(22)
-  doc.setTextColor(16, 69, 79)
+  doc.setFontSize(19)
+  doc.setTextColor(...colors.teal)
   doc.text('Raio-X FAROL', margin, y)
-  y += 9
-  addText('L — Liberação de Valor · Processo e valor com IA', 10, [80, 98, 102], 9)
-  addText(`Nome: ${report.nome}`, 10, [16, 69, 79], 3)
-  if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [16, 69, 79], 3)
-  addText(
-    `Contexto: ${report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa'}`,
-    10,
-    [80, 98, 102],
-    3,
-  )
-
-  y += 4
-  const stageBlockHeight = (stage: Report['stages'][number]) =>
-    5 + estimateTextHeight(stage.reading, 9, 0) + 4
-  const stagesHeight =
-    15 * 0.45 + 8 + report.stages.reduce((total, stage) => total + stageBlockHeight(stage), 0)
-  ensureSpace(stagesHeight)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('Seu FAROL', margin, y)
-  y += 8
-  report.stages.forEach((stage) => {
+  drawText('L — Liberação de Valor · Processo e valor com IA', margin, y + 6.5, width, 8.5, colors.slate)
+  const identityTop = 52
+  drawCard(margin, identityTop, width, 23, colors.paper)
+  const columns = [
+    { x: margin + 6, w: 58, label: 'RELATÓRIO PARA', value: report.nome },
+    { x: margin + 68, w: 48, label: 'PERCURSO', value: report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa' },
+    { x: margin + 119, w: 46, label: 'EMPRESA', value: report.empresa || '—' },
+  ]
+  columns.forEach((column) => {
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9)
-    doc.setTextColor(16, 69, 79)
-    doc.text(`${stage.key} — ${stage.title}`, margin, y)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`${stage.score}/100 · ${stage.state}`, margin + 32, y)
-    y += 2.5
-    doc.setFillColor(129, 130, 116)
-    doc.roundedRect(margin, y, width, 3.5, 1.75, 1.75, 'F')
-    doc.setFillColor(16, 69, 79)
-    doc.roundedRect(margin, y, Math.max(5, (width * stage.score) / 100), 3.5, 1.75, 1.75, 'F')
-    y += 5.5
-    addText(stage.reading, 9, [80, 98, 102], 4)
+    doc.setFontSize(6.4)
+    doc.setTextColor(...colors.olive)
+    doc.text(column.label, column.x, identityTop + 7)
+    drawText(column.value, column.x, identityTop + 14, column.w, 8.2, colors.ink, true)
   })
-  doc.addPage()
-  y = 20
-  const recommendationHeight =
-    15 * 0.45 + 8 + 12 + estimateTextHeight(report.routingExplanation, 10, 6) + 10
-  ensureSpace(recommendationHeight)
+
+  const heroTop = 82
+  drawCard(margin, heroTop, width, 39, colors.teal, colors.teal)
+  doc.setFillColor(...colors.lime)
+  doc.roundedRect(margin, heroTop + 6, 2, 27, 1, 1, 'F')
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('Próximo passo recomendado', margin, y)
-  y += 6
-  doc.setFillColor(189, 224, 56)
-  doc.roundedRect(margin, y - 1, width, 11, 2, 2, 'F')
+  doc.setFontSize(7)
+  doc.setTextColor(...colors.lime)
+  doc.text('PRÓXIMO PASSO RECOMENDADO', margin + 7, heroTop + 9)
+  doc.setFontSize(13)
+  doc.setTextColor(...colors.white)
+  doc.text(report.nextProduct, margin + 7, heroTop + 18)
+  drawText(report.routingExplanation, margin + 7, heroTop + 24, 125, 7.6, colors.white)
+  const overallCx = 210 - margin - 18
+  const overallCy = heroTop + 19.5
+  doc.setFillColor(...colors.lime)
+  doc.circle(overallCx, overallCy, 10, 'F')
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
-  doc.setTextColor(16, 69, 79)
-  doc.text(report.nextProduct, margin + 4, y + 6.5)
-  y += 15
-  addText(report.routingExplanation, 10, [80, 98, 102], 6)
+  doc.setTextColor(...colors.teal)
+  doc.text(String(report.overall), overallCx, overallCy + 1, { align: 'center' })
+  doc.setFontSize(6.4)
+  doc.text('/100', overallCx, overallCy + 5.6, { align: 'center' })
 
-  const gatesHeight =
-    15 * 0.45 +
-    8 +
-    8 +
-    report.pilotConditions.reduce(
-      (total, item) => total + estimateTextHeight(`• ${item}`, 9, 3),
-      0,
-    ) +
-    (report.safetyAlerts.length > 0
-      ? 13 * 0.45 +
-        7 +
-        report.safetyAlerts.reduce(
-          (total, item) => total + estimateTextHeight(`• ${item}`, 9, 3),
-          0,
-        ) +
-        2
-      : 0)
-  ensureSpace(gatesHeight)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(15)
-  doc.setTextColor(16, 69, 79)
-  doc.text('Condições antes de qualquer piloto', margin, y)
-  y += 7
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
-  const statusWidth = doc.getTextWidth(report.pilotStatus) + 6
-  doc.setFillColor(16, 69, 79)
-  doc.roundedRect(margin, y - 4, statusWidth, 6, 3, 3, 'F')
-  doc.setTextColor(255, 255, 255)
-  doc.text(report.pilotStatus, margin + 3, y)
-  y += 8
-  report.pilotConditions.forEach((item) => addText(`• ${item}`, 9, [16, 69, 79], 3))
-  if (report.safetyAlerts.length > 0) {
+  */
+  y = 133
+=======
+  y = 133
+=======
+
+  */
+  y = 133
+  y = drawSection('Seu FAROL', y)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(7.2)
+  doc.setTextColor(...colors.slate)
+  doc.text('Pontuação por eixo · escala de 0 a 100', 210 - margin, y - 5, { align: 'right' })
+  const barTop = y + 1
+  const barStep = 25
+  report.stages.forEach((stage, index) => {
+    const top = barTop + index * barStep
+    const accent = axisColors[index % axisColors.length]
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(13)
-    doc.setTextColor(16, 69, 79)
-    doc.text('Segurança e revisão', margin, y)
-    y += 7
-    report.safetyAlerts.forEach((item) => addText(`• ${item}`, 9, [16, 69, 79], 3))
-    y += 2
+    doc.setFontSize(9.1)
+    doc.setTextColor(...colors.ink)
+    doc.text(`${stage.key} — ${stage.title}`, margin, top + 4)
+    doc.setFontSize(8.8)
+    doc.setTextColor(...colors.teal)
+    doc.text(`${stage.score}/100`, 210 - margin, top + 4, { align: 'right' })
+    doc.setFillColor(...colors.track)
+    doc.roundedRect(margin, top + 7, width, 4, 1.8, 1.8, 'F')
+    const fillWidth = Math.max(0, Math.min(width, (width * stage.score) / 100))
+    if (fillWidth > 0.2) {
+      doc.setFillColor(...accent)
+      doc.roundedRect(margin, top + 7, fillWidth, 4, 1.8, 1.8, 'F')
+    }
+    doc.setDrawColor(...colors.white)
+    doc.setLineWidth(0.4)
+    doc.line(margin + width / 2, top + 6.7, margin + width / 2, top + 11.3)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7)
+    doc.setTextColor(...colors.slate)
+    doc.text(stage.state, margin, top + 17)
+  })
+  const scaleY = barTop + barStep * report.stages.length - 1
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(6.8)
+  doc.setTextColor(...colors.slate)
+  doc.text('0', margin, scaleY)
+  doc.text('50', margin + width / 2, scaleY, { align: 'center' })
+  doc.text('100', 210 - margin, scaleY, { align: 'right' })
+  doc.addPage()
+  drawTopRule()
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7.3)
+  doc.setTextColor(...colors.olive)
+  doc.text('SEU FAROL', margin, 18)
+  doc.setFontSize(16.5)
+  doc.setTextColor(...colors.teal)
+  doc.text('Leitura por etapa', margin, 27)
+  drawText('A pontuação organiza a conversa; cada eixo mostra um aspecto do cenário.', margin, 34, width, 8.2, colors.slate)
+  const readingGap = 6
+  const readingWidth = (width - readingGap) / 2
+  const readingTop = 44
+  const readingHeight = 47
+  report.stages.forEach((stage, index) => {
+    const x = margin + (index % 2) * (readingWidth + readingGap)
+    const top = readingTop + Math.floor(index / 2) * 54
+    const accent = axisColors[index % axisColors.length]
+    drawCard(x, top, readingWidth, readingHeight, colors.white)
+    doc.setFillColor(...accent)
+    doc.roundedRect(x, top, 2, readingHeight, 0.9, 0.9, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(...colors.teal)
+    doc.text(`${stage.key} — ${stage.title}`, x + 6, top + 9)
+    doc.setFontSize(7.8)
+    doc.setTextColor(...colors.ink)
+    doc.text(`${stage.score}/100`, x + readingWidth - 5, top + 9, { align: 'right' })
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.9)
+    doc.setTextColor(...colors.olive)
+    doc.text(stage.state, x + 6, top + 15)
+    drawText(stage.reading, x + 6, top + 23, readingWidth - 12, 7.4, colors.slate)
+  })
+
+  y = 158
+  y = drawSection('Ponto de atenção principal', y)
+  const insightTop = y
+  const insightHeight = 41
+  drawCard(margin, insightTop, width, insightHeight, colors.paper)
+  doc.setFillColor(...colors.lime)
+  doc.roundedRect(margin, insightTop, 2, insightHeight, 0.9, 0.9, 'F')
+  const splitX = margin + 84
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(6.8)
+  doc.setTextColor(...colors.olive)
+  doc.text(`GARGALO · ${report.bottleneck.key}`, margin + 7, insightTop + 8)
+  doc.setFontSize(10)
+  doc.setTextColor(...colors.teal)
+  doc.text(report.bottleneck.title, margin + 7, insightTop + 15)
+  drawText(report.bottleneck.description, margin + 7, insightTop + 21, 70, 7.8, colors.slate)
+  doc.setDrawColor(...colors.line)
+  doc.line(splitX, insightTop + 6, splitX, insightTop + insightHeight - 6)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(6.8)
+  doc.setTextColor(...colors.olive)
+  doc.text('PRIMEIRA AÇÃO', splitX + 6, insightTop + 8)
+  drawText(report.firstValue, splitX + 6, insightTop + 15, width - 98, 7.8, colors.ink)
+
+  doc.addPage()
+  drawTopRule()
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7.3)
+  doc.setTextColor(...colors.olive)
+  doc.text('LIBERAÇÃO DE VALOR', margin, 18)
+  doc.setFontSize(16.5)
+  doc.setTextColor(...colors.teal)
+  doc.text('Da leitura à ação', margin, 27)
+  drawText('Condições para avançar e próximos passos para transformar a leitura em ação.', margin, 34, width, 8.2, colors.slate)
+  y = 43
+  y = drawSection('Condições antes de qualquer piloto', y)
+  const statusHeight = Math.max(17, textHeight(report.pilotStatus, 8.2, width - 18, true) + 9)
+  drawCard(margin, y, width, statusHeight, colors.paper)
+  doc.setFillColor(...colors.teal)
+  doc.roundedRect(margin, y, 2, statusHeight, 0.9, 0.9, 'F')
+  drawText(report.pilotStatus, margin + 8, y + 6, width - 16, 8.2, colors.ink, true)
+  y += statusHeight + 3
+  y = drawSection('Pontos a confirmar', y)
+  report.pilotConditions.forEach((item) => {
+    y = drawListItem(item, y, colors.white, colors.sage, 7.8)
+  })
+  if (report.safetyAlerts.length > 0) {
+    y += 1
+    y = drawSection('Segurança e revisão', y)
+    report.safetyAlerts.forEach((item) => {
+      y = drawListItem(item, y, colors.paper, colors.olive, 7.8)
+    })
   }
   doc.addPage()
   y = 20
-  const liberationItems: Array<[string, number, [number, number, number], number]> = [
-    [`Primeira ação: ${report.firstValue}`, 10, [16, 69, 79], 5],
-  ]
-  if (report.tipo === 'empresa' && report.context.processo)
-    liberationItems.push([`Processo escolhido: ${report.context.processo}`, 9, [80, 98, 102], 5])
-  if (report.tipo === 'executivo' && report.context.mudancaDesejada)
-    liberationItems.push([
-      `O que você gostaria de mudar: ${report.context.mudancaDesejada}`,
-      10,
-      [16, 69, 79],
-      5,
-    ])
-  if (report.tipo === 'empresa' && report.context.porQueAgora)
-    liberationItems.push([`Por que agora: ${report.context.porQueAgora}`, 10, [16, 69, 79], 5])
-  if (report.tipo === 'empresa' && report.context.fluxoAtual)
-    liberationItems.push([`Fluxo descrito: ${report.context.fluxoAtual}`, 9, [80, 98, 102], 5])
-  if (report.tipo === 'empresa' && report.context.criterioSucesso)
-    liberationItems.push([
-      `Critério de sucesso informado: ${report.context.criterioSucesso}`,
-      9,
-      [80, 98, 102],
-      5,
-    ])
-  liberationItems.push(
-    [`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [16, 69, 79], 5],
-    [`Resultado a acompanhar: ${report.measurement}.`, 10, [16, 69, 79], 7],
+  y = 43
+  if (report.tipo === 'empresa' && report.context.processo) {
+    y = drawSection('Processo escolhido', y + 1)
+    y = drawListItem(report.context.processo, y, colors.paper, colors.teal, 8.1, 'Processo escolhido')
+  }
+  if (report.tipo === 'executivo' && report.context.mudancaDesejada) {
+    y = drawSection('O que você gostaria de mudar', y + 1)
+    y = drawListItem(report.context.mudancaDesejada, y, colors.paper, colors.sage, 8.1, 'O que você gostaria de mudar')
+  }
+  if (report.tipo === 'empresa' && report.context.porQueAgora) {
+    y = drawSection('Por que agora', y + 1)
+    y = drawListItem(report.context.porQueAgora, y, colors.paper, colors.sage, 8.1, 'Por que agora')
+  }
+  if (report.tipo === 'empresa' && report.context.fluxoAtual) {
+    y = drawSection('Fluxo descrito', y + 1)
+    y = drawListItem(report.context.fluxoAtual, y, colors.paper, colors.slate, 8.1, 'Fluxo descrito')
+  }
+  if (report.tipo === 'empresa' && report.context.criterioSucesso) {
+    y = drawSection('Critério de sucesso informado', y + 1)
+    y = drawListItem(report.context.criterioSucesso, y, colors.paper, colors.olive, 8.1, 'Critério de sucesso')
+  }
+  y += 2
+  y = drawSection('L — Liberação de Valor', y)
+  const metricGap = 6
+  const metricWidth = (width - metricGap) / 2
+  const metricFont = 8
+  const metricHeight = Math.max(
+    29,
+    Math.max(
+      textHeight(report.primeiraAplicacao, metricFont, metricWidth - 12),
+      textHeight(report.measurement, metricFont, metricWidth - 12),
+    ) + 16,
   )
-  const liberationHeight =
-    15 * 0.45 +
-    8 +
-    liberationItems.reduce(
-      (total, [text, size, _color, gap]) => total + estimateTextHeight(text, size, gap),
-      0,
-    )
-  ensureSpace(liberationHeight)
-  addSectionHeading('L — Liberação de Valor')
-  liberationItems.forEach(([text, size, color, gap]) => addText(text, size, color, gap))
-  addSectionHeading('Próximas ações')
-  report.sevenDayPlan.forEach((item, index) =>
-    addText(`${index + 1}. ${item}`, 10, [23, 59, 66], 3),
-  )
-  addSectionHeading('Cuidados para esta etapa')
-  report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
+  drawCard(margin, y, metricWidth, metricHeight, colors.paper)
+  drawCard(margin + metricWidth + metricGap, y, metricWidth, metricHeight, colors.paper)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(6.5)
+  doc.setTextColor(...colors.olive)
+  doc.text('PRIMEIRA APLICAÇÃO', margin + 6, y + 7)
+  doc.text('RESULTADO A ACOMPANHAR', margin + metricWidth + metricGap + 6, y + 7)
+  drawText(report.primeiraAplicacao, margin + 6, y + 14, metricWidth - 12, metricFont, colors.ink)
+  drawText(report.measurement, margin + metricWidth + metricGap + 6, y + 14, metricWidth - 12, metricFont, colors.ink)
+  y += metricHeight + 4
+  y += 2
+  y = drawSection('Próximas ações', y)
+  report.sevenDayPlan.forEach((item, index) => {
+    const height = Math.max(12, textHeight(item, 7.9, width - 23) + 6)
+    if (y + height > 276) y = startContinuationPage('Próximas ações')
+    drawCard(margin + 9, y, width - 9, height, colors.white)
+    doc.setFillColor(...colors.teal)
+    doc.circle(margin + 4.5, y + height / 2, 3.3, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(7)
+    doc.setTextColor(...colors.white)
+    doc.text(String(index + 1), margin + 4.5, y + height / 2 + 1, { align: 'center' })
+    drawText(item, margin + 14, y + 5, width - 18, 7.9, colors.ink)
+    y += height + 2
+  })
+  y += 1
+  y = drawSection('Cuidados para esta etapa', y)
+  report.avoid.forEach((item) => {
+    y = drawListItem(item, y, colors.paper, colors.olive, 7.8)
+  })
+  y += 1
+  const limitationHeight = Math.max(22, textHeight(report.limitations, 7.5, width - 16) + 13)
+  if (y + limitationHeight > 276) y = startContinuationPage('Importante')
+  drawCard(margin, y, width, limitationHeight, colors.paper)
+  doc.setFillColor(...colors.slate)
+  doc.roundedRect(margin, y, 2, limitationHeight, 0.9, 0.9, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(6.5)
+  doc.setTextColor(...colors.olive)
+  doc.text('IMPORTANTE', margin + 7, y + 6)
+  drawText(report.limitations, margin + 7, y + 12, width - 15, 7.5, colors.ink)
 
-  addText(report.limitations, 9, [80, 98, 102], 4)
+  const pageCount = doc.getNumberOfPages()
+  for (let page = 1; page <= pageCount; page += 1) {
+    doc.setPage(page)
+    doc.setDrawColor(...colors.line)
+    doc.setLineWidth(0.25)
+    doc.line(margin, 284, 210 - margin, 284)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7)
+    doc.setTextColor(...colors.slate)
+    doc.text('SIMBIOSIA · RAIO-X FAROL', margin, 289)
+    doc.text(`${String(page).padStart(2, '0')} / ${String(pageCount).padStart(2, '0')}`, 210 - margin, 289, {
+      align: 'right',
+    })
+  }
   return doc.output('datauristring')
 }
 
