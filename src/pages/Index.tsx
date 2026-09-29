@@ -94,11 +94,11 @@ function createRaioxPdf(report: Report) {
   doc.setTextColor(16, 69, 79)
   doc.text('Raio-X FAROL', margin, y)
   y += 9
-  addText('L — Liberação de Valor · Prontidão para liberar valor com IA', 10, [80, 98, 102], 9)
+  addText('L — Liberação de Valor · Processo e valor com IA', 10, [80, 98, 102], 9)
   addText(`Nome: ${report.nome}`, 10, [23, 59, 66], 3)
   if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [23, 59, 66], 3)
   addText(
-    `Contexto: ${report.tipo === 'executivo' ? 'Minha rotina profissional' : 'Minha empresa'}`,
+    `Contexto: ${report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa'}`,
     10,
     [80, 98, 102],
     3,
@@ -198,7 +198,7 @@ const executiveSections: Array<{
     key: 'F',
     letter: 'F',
     title: 'Foco',
-    intro: 'Onde está a oportunidade concreta na sua rotina profissional?',
+    intro: 'Qual processo da sua atuação profissional você gostaria de melhorar?',
     questions: [
       { id: 'E-CAD3', label: 'Cargo ou função principal', type: 'text', required: true },
       { id: 'E-CAD4', label: 'Empresa em que trabalha', type: 'text', required: true },
@@ -232,8 +232,25 @@ const executiveSections: Array<{
         ].map(([value, label]) => ({ value, label })),
       },
       {
+        id: 'E-F2',
+        label: 'Qual processo você gostaria de melhorar?',
+        type: 'single',
+        required: true,
+        options: [
+          ['reunioes', 'Reuniões e preparação de reuniões'],
+          ['mensagens', 'E-mails e mensagens'],
+          ['propostas', 'Propostas, relatórios ou apresentações'],
+          ['analise', 'Análise de dados e informações'],
+          ['clientes', 'Acompanhamento de clientes ou oportunidades'],
+          ['planejamento', 'Planejamento e priorização'],
+          ['pessoas', 'Atendimento ou coordenação de pessoas'],
+          ['registro', 'Registro e organização do trabalho'],
+          ['outra', 'Outra'],
+        ].map(([value, label]) => ({ value, label })),
+      },
+      {
         id: 'E-CAD7',
-        label: 'Como você conhece a rotina escolhida?',
+        label: 'Como você conhece esse processo?',
         type: 'single',
         required: true,
         options: [
@@ -261,25 +278,8 @@ const executiveSections: Array<{
         ].map(([value, label]) => ({ value, label })),
       },
       {
-        id: 'E-F2',
-        label: 'Qual rotina você gostaria de melhorar?',
-        type: 'single',
-        required: true,
-        options: [
-          ['reunioes', 'Reuniões e preparação de reuniões'],
-          ['mensagens', 'E-mails e mensagens'],
-          ['propostas', 'Propostas, relatórios ou apresentações'],
-          ['analise', 'Análise de dados e informações'],
-          ['clientes', 'Acompanhamento de clientes ou oportunidades'],
-          ['planejamento', 'Planejamento e priorização'],
-          ['pessoas', 'Atendimento ou coordenação de pessoas'],
-          ['registro', 'Registro e organização do trabalho'],
-          ['outra', 'Outra'],
-        ].map(([value, label]) => ({ value, label })),
-      },
-      {
         id: 'E-F3',
-        label: 'Com que frequência essa rotina acontece?',
+        label: 'Com que frequência esse processo acontece?',
         type: 'single',
         required: true,
         options: [
@@ -293,7 +293,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-F4',
-        label: 'O que acontece quando essa rotina não funciona bem?',
+        label: 'O que acontece quando esse processo não funciona bem?',
         type: 'multi',
         required: true,
         maxSelections: 3,
@@ -329,7 +329,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-F6',
-        label: 'O que você gostaria que fosse diferente nessa rotina?',
+        label: 'O que você gostaria que fosse diferente nesse processo?',
         type: 'text',
         help: 'Descreva em poucas linhas.',
         required: true,
@@ -340,11 +340,11 @@ const executiveSections: Array<{
     key: 'A',
     letter: 'A',
     title: 'Arquitetura',
-    intro: 'Quais informações, documentos e fontes sustentam essa rotina?',
+    intro: 'Quais informações, documentos e fontes sustentam esse processo?',
     questions: [
       {
         id: 'E-A1',
-        label: 'Que materiais ou informações fazem parte dessa rotina?',
+        label: 'Que materiais ou informações fazem parte desse processo?',
         type: 'multi',
         required: true,
         options: [
@@ -393,7 +393,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-A4',
-        label: 'Existem modelos ou padrões reutilizáveis nessa rotina?',
+        label: 'Existem modelos ou padrões reutilizáveis nesse processo?',
         type: 'single',
         required: true,
         options: [
@@ -406,7 +406,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-A5',
-        label: 'Que tipos de informação aparecem nessa rotina?',
+        label: 'Que tipos de informação aparecem nesse processo?',
         type: 'multi',
         required: true,
         options: [
@@ -443,7 +443,7 @@ const executiveSections: Array<{
     questions: [
       {
         id: 'E-R1',
-        label: 'Quantas vezes essa rotina acontece em uma semana típica?',
+        label: 'Quantas vezes esse processo acontece em uma semana típica?',
         type: 'single',
         required: true,
         options: [
@@ -470,7 +470,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-R3',
-        label: 'Quais tarefas manuais se repetem nessa rotina?',
+        label: 'Quais tarefas manuais se repetem nesse processo?',
         type: 'multi',
         required: true,
         options: [
@@ -504,7 +504,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-R5',
-        label: 'O resultado final dessa rotina tem um padrão claro?',
+        label: 'O resultado final desse processo tem um padrão claro?',
         type: 'single',
         required: true,
         options: [
@@ -517,7 +517,7 @@ const executiveSections: Array<{
       },
       {
         id: 'E-R6',
-        label: 'Como você mede hoje o tempo, volume ou qualidade dessa rotina?',
+        label: 'Como você mede hoje o tempo, volume ou qualidade desse processo?',
         type: 'single',
         required: true,
         options: [
@@ -531,7 +531,7 @@ const executiveSections: Array<{
       {
         id: 'E-R7',
         label:
-          'Se você tivesse de explicar essa rotina para outra pessoa, conseguiria descrever todas as etapas?',
+          'Se você tivesse de explicar esse processo para outra pessoa, conseguiria descrever todas as etapas?',
         type: 'single',
         required: true,
         options: [
@@ -559,7 +559,7 @@ const executiveSections: Array<{
           ['ocasional', 'Uso ocasionalmente'],
           ['semanal', 'Uso semanalmente'],
           ['quase_todos', 'Uso quase todos os dias'],
-          ['estruturado', 'Uso em uma rotina estruturada'],
+          ['estruturado', 'Uso em um processo estruturado'],
           ['nao_sei_permitido', 'Não sei se o uso é permitido'],
         ].map(([value, label]) => ({ value, label })),
       },
@@ -592,7 +592,7 @@ const executiveSections: Array<{
       {
         id: 'E-O4',
         label:
-          'Quanto tempo você conseguiria reservar por semana para testar e ajustar uma nova rotina?',
+          'Quanto tempo você conseguiria reservar por semana para testar e ajustar um novo processo?',
         type: 'single',
         required: true,
         options: [
@@ -607,7 +607,7 @@ const executiveSections: Array<{
       {
         id: 'E-O5',
         label:
-          'Se uma aplicação simples funcionasse, você conseguiria incorporá-la à sua rotina nos próximos 30 dias?',
+          'Se uma aplicação simples funcionasse, você conseguiria incorporá-la ao seu processo nos próximos 30 dias?',
         type: 'single',
         required: true,
         options: [
@@ -621,7 +621,7 @@ const executiveSections: Array<{
       {
         id: 'E-O6',
         label:
-          'Um erro nessa rotina poderia afetar clientes, colaboradores, dinheiro, contratos ou decisões importantes?',
+          'Um erro nesse processo poderia afetar clientes, colaboradores, dinheiro, contratos ou decisões importantes?',
         type: 'single',
         required: true,
         options: [
@@ -737,7 +737,7 @@ const companySections: Array<{
           ['empresa_funil', 'Leads e oportunidades se perdem no funil'],
           ['empresa_propostas', 'Propostas e follow-ups demoram ou não têm padrão'],
           ['empresa_fechamento', 'Fechamento e informações de caixa pouco previsíveis'],
-          ['empresa_recebiveis', 'Recebíveis e cobranças sem rotina consistente'],
+          ['empresa_recebiveis', 'Recebíveis e cobranças sem processo consistente'],
           ['empresa_aprovacoes', 'Contas a pagar e aprovações com retrabalho ou risco'],
           ['outra', 'Outra dor'],
         ].map(([value, label]) => ({ value, label })),
@@ -746,7 +746,7 @@ const companySections: Array<{
         id: 'C-F3',
         label: 'Qual processo específico você gostaria de analisar primeiro?',
         type: 'text',
-        help: 'Descreva uma rotina ou fluxo concreto. Ex.: registrar um pedido, aprovar uma despesa ou acompanhar uma proposta. Evite responder apenas “melhorar vendas”, “comunicação” ou “usar IA”.',
+        help: 'Descreva um processo ou fluxo concreto. Ex.: registrar um pedido, aprovar uma despesa ou acompanhar uma proposta. Evite responder apenas “melhorar vendas”, “comunicação” ou “usar IA”.',
         required: true,
       },
       {
@@ -1339,7 +1339,7 @@ export default function Index() {
             <h1>Prontidão para liberar valor com IA.</h1>
             <p>
               Descubra onde você ou sua empresa pode começar a usar IA com segurança, foco e
-              resultado. Leva cerca de 7 a 10 minutos.
+              resultado. Leva em torno de 7 minutos.
             </p>
             <div className="promise">
               <Sparkles size={18} />
@@ -1351,22 +1351,23 @@ export default function Index() {
           </section>
           <section className="choice-grid">
             <button className="choice-card" onClick={() => start('executivo')}>
-              <span className="choice-letter">E</span>
+              <span className="choice-letter">P</span>
               <span>
-                <strong>Minha rotina profissional</strong>
+                <strong>Meu processo profissional</strong>
                 <small>
-                  Para donos, sócios, executivos e profissionais que querem começar pela própria
-                  rotina.
+                  Para donos, sócios, executivos e profissionais que querem começar por um processo
+                  da própria atuação.
                 </small>
               </span>
               <ChevronRight />
             </button>
             <button className="choice-card" onClick={() => start('empresa')}>
-              <span className="choice-letter">O</span>
+              <span className="choice-letter">E</span>
               <span>
                 <strong>Minha empresa</strong>
                 <small>
-                  Para quem quer avaliar a prontidão de um processo ou área da organização.
+                  Para quem quer avaliar um processo ou área da organização e identificar onde a IA
+                  pode gerar valor.
                 </small>
               </span>
               <ChevronRight />
@@ -1439,7 +1440,7 @@ export default function Index() {
                   />
                 </label>
                 <label>
-                  <span>Seu e-mail</span>
+                  <span>Seu e-mail corporativo</span>
                   <input
                     type="email"
                     value={email}

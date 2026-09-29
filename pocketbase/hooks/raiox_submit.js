@@ -73,10 +73,10 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const stageReading = (key, score) => {
     if (key === 'F')
       return score >= 75
-        ? 'A dor, a rotina e o resultado desejado estão suficientemente claros para planejar uma primeira aplicação.'
+        ? 'A dor, o processo e o resultado desejado estão suficientemente claros para planejar uma primeira aplicação.'
         : score >= 50
           ? 'Existe uma direção, mas ainda é preciso estreitar o problema e definir melhor o resultado.'
-          : 'O interesse em IA ainda está mais amplo que uma oportunidade concreta. Comece por uma rotina ou processo específico.'
+          : 'O interesse em IA ainda está mais amplo que uma oportunidade concreta. Comece por um processo específico.'
     if (key === 'A')
       return score >= 75
         ? 'Há contexto, fontes e materiais suficientes para planejar uma aplicação.'
@@ -85,7 +85,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
           : 'Antes de aplicar IA, será necessário organizar fontes, documentos, dados ou permissões.'
     if (key === 'R')
       return score >= 75
-        ? 'A rotina é recorrente e suficientemente visível para ser melhorada e medida.'
+        ? 'O processo é recorrente e suficientemente visível para ser melhorado e medido.'
         : score >= 50
           ? 'O fluxo é reconhecível, mas há etapas, responsáveis ou indicadores que ainda precisam ser explicitados.'
           : 'Ainda não há uma visão clara do trabalho real. Automatizar agora pode apenas acelerar a desorganização.'
@@ -129,9 +129,9 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
       operacoes: 'Operações',
       atendimento: 'Atendimento ao cliente',
       administrativo: 'Administração',
-      rotina_comercial: 'uma rotina comercial',
-      rotina_financeira: 'uma rotina financeira',
-      rotina_pessoas: 'uma rotina de pessoas',
+      rotina_comercial: 'um processo comercial',
+      rotina_financeira: 'um processo financeiro',
+      rotina_pessoas: 'um processo de pessoas',
       resposta: 'tempo de resposta',
       erros: 'erros e qualidade',
       tarefas: 'tarefas concluídas',
@@ -368,7 +368,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
 
     foco = pretty(get('E-F2'))
     primeiraAplicacao = foco
-    indicador = readableIndicators(arr('E-F5'), 'tempo, volume ou qualidade da rotina')
+    indicador = readableIndicators(arr('E-F5'), 'tempo, volume ou qualidade do processo')
     apoio = pretty(get('E-O7'))
   } else {
     F += get('C-F1') && get('C-F1') !== 'outra' ? 15 : 0
@@ -574,14 +574,14 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const overall = Math.round((F + A + R + O) / 4)
   let nextProduct = 'FAROL Essencial'
   let routingExplanation =
-    'O FAROL Essencial ajuda a delimitar uma dor e uma rotina ou processo antes de escolher uma aplicação.'
+    'O FAROL Essencial ajuda a delimitar uma dor e um processo antes de escolher uma aplicação.'
   let isCrossFunctional = false
   if (tipo === 'executivo') {
     const executiveSpecific = F >= 90 && get('E-F1') !== 'outro' && get('E-F2') !== 'outra'
     if (executiveSpecific && A >= 75 && R >= 75 && O >= 75) {
       nextProduct = 'FAROL Executivo'
       routingExplanation =
-        'Você descreveu uma rotina profissional específica. O FAROL Executivo é o próximo passo para aprofundar essa aplicação; as condições de uso ainda precisam ser confirmadas.'
+        'Você descreveu um processo profissional específico. O FAROL Executivo é o próximo passo para aprofundar essa aplicação; as condições de uso ainda precisam ser confirmadas.'
     }
   } else {
     const businessSpecific =
@@ -737,7 +737,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const sevenDayPlan =
     tipo === 'executivo'
       ? [
-          'Descreva as etapas da rotina escolhida e onde ocorre a maior dificuldade.',
+          'Descreva as etapas do processo escolhido e onde ocorre a maior dificuldade.',
           'Liste as informações usadas e identifique quais exigem cuidado ou autorização.',
           'Registre o tempo ou esforço envolvido em uma ocorrência.',
           'Combine quem pode avaliar o resultado e quais regras de uso se aplicam.',
@@ -753,7 +753,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const avoid =
     tipo === 'executivo'
       ? [
-          'Comprar novas ferramentas antes de definir a rotina.',
+          'Comprar novas ferramentas antes de definir o processo.',
           'Enviar dados confidenciais sem verificar regras de uso.',
           'Tratar uma resposta da IA como decisão sem revisão.',
         ]
@@ -809,7 +809,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     limitations:
       tipo === 'empresa'
         ? 'Esta autoavaliação organiza as informações fornecidas sobre o processo. A recomendação indica o próximo passo de conversa; a definição de qualquer projeto depende de diagnóstico, validação dos dados e alinhamento com a equipe.'
-        : 'Esta autoavaliação organiza as informações fornecidas sobre a rotina escolhida. A recomendação indica o próximo passo; confirme as regras de uso, os dados e a revisão humana antes de qualquer teste.',
+        : 'Esta autoavaliação organiza as informações fornecidas sobre o processo escolhido. A recomendação indica o próximo passo; confirme as regras de uso, os dados e a revisão humana antes de qualquer teste.',
   }
 
   const esc = (value) =>
@@ -838,7 +838,7 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const subject = 'Seu Raio-X FAROL — Liberação de Valor'
   const html =
     '<div style="font-family:Arial,sans-serif;color:#173b42;max-width:640px;margin:0 auto;line-height:1.55;">' +
-    '<div style="background:#10454f;padding:28px 30px;color:#ffffff;"><div style="font-size:13px;letter-spacing:3px;font-weight:bold;color:#bde038;">SIMBIOSIA</div><h1 style="margin:10px 0 0;font-size:28px;">Raio-X FAROL</h1><p style="margin:8px 0 0;color:#e4f2f0;">Prontidão para liberar valor com IA</p></div>' +
+    '<div style="background:#10454f;padding:28px 30px;color:#ffffff;"><div style="font-size:13px;letter-spacing:3px;font-weight:bold;color:#bde038;">SIMBIOSIA</div><h1 style="margin:10px 0 0;font-size:28px;">Raio-X FAROL</h1><p style="margin:8px 0 0;color:#e4f2f0;">Processo e valor com IA</p></div>' +
     '<div style="padding:26px 30px;background:#ffffff;"><p>Olá, ' +
     esc(nome) +
     '.</p><p>Este é o seu relatório de <strong>Liberação de Valor</strong>, o L do Método FAROL. Ele organiza os próximos passos a partir das informações que você compartilhou.</p>' +
