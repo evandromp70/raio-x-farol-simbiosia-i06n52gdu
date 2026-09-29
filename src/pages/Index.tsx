@@ -1336,7 +1336,7 @@ export default function Index() {
           </header>
           <section className="landing-hero">
             <div className="report-kicker">RAIO-X FAROL</div>
-            <h1>Prontidão para liberar valor com IA.</h1>
+            <h1>Qual legado você quer construir com IA?</h1>
             <p>
               Descubra onde você ou sua empresa pode começar a usar IA com segurança, foco e
               resultado. Leva em torno de 7 minutos.
