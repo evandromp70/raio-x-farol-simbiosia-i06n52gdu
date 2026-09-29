@@ -16,7 +16,6 @@ import {
 } from '@/services/simbiosiaLogo'
 import { submitRaiox, RaioxTipo } from '@/services/raiox'
 import { createRaioxPdfModern } from '@/services/raioxPdf'
-import { createRaioxPdfModern } from '@/services/raioxPdf'
 
 type Answer = string | string[]
 type Question = {
