@@ -57,7 +57,11 @@ function createRaioxPdf(report: Report) {
   const textHeight = (text: string, size: number, maxWidth: number, bold = false) => {
     doc.setFont('helvetica', bold ? 'bold' : 'normal')
     doc.setFontSize(size)
-    return (doc.splitTextToSize(String(text == null ? '' : text), maxWidth) as string[]).length * size * 0.46
+    return (
+      (doc.splitTextToSize(String(text == null ? '' : text), maxWidth) as string[]).length *
+      size *
+      0.46
+    )
   }
   const drawText = (
     text: string,
@@ -208,12 +212,24 @@ function createRaioxPdf(report: Report) {
   doc.setFontSize(19)
   doc.setTextColor(...colors.teal)
   doc.text('Raio-X FAROL', margin, y)
-  drawText('L — Liberação de Valor · Processo e valor com IA', margin, y + 6.5, width, 8.5, colors.slate)
+  drawText(
+    'L — Liberação de Valor · Processo e valor com IA',
+    margin,
+    y + 6.5,
+    width,
+    8.5,
+    colors.slate,
+  )
   const identityTop = 52
   drawCard(margin, identityTop, width, 23, colors.paper)
   const columns = [
     { x: margin + 6, w: 58, label: 'RELATÓRIO PARA', value: report.nome },
-    { x: margin + 68, w: 48, label: 'PERCURSO', value: report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa' },
+    {
+      x: margin + 68,
+      w: 48,
+      label: 'PERCURSO',
+      value: report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa',
+    },
     { x: margin + 119, w: 46, label: 'EMPRESA', value: report.empresa || '—' },
   ]
   columns.forEach((column) => {
@@ -247,7 +263,7 @@ function createRaioxPdf(report: Report) {
   doc.setFontSize(6.4)
   doc.text('/100', overallCx, overallCy + 5.6, { align: 'center' })
 
-  */
+  /*
   y = 133
 =======
   y = 133
@@ -303,7 +319,14 @@ function createRaioxPdf(report: Report) {
   doc.setFontSize(16.5)
   doc.setTextColor(...colors.teal)
   doc.text('Leitura por etapa', margin, 27)
-  drawText('A pontuação organiza a conversa; cada eixo mostra um aspecto do cenário.', margin, 34, width, 8.2, colors.slate)
+  drawText(
+    'A pontuação organiza a conversa; cada eixo mostra um aspecto do cenário.',
+    margin,
+    34,
+    width,
+    8.2,
+    colors.slate,
+  )
   const readingGap = 6
   const readingWidth = (width - readingGap) / 2
   const readingTop = 44
@@ -362,7 +385,14 @@ function createRaioxPdf(report: Report) {
   doc.setFontSize(16.5)
   doc.setTextColor(...colors.teal)
   doc.text('Da leitura à ação', margin, 27)
-  drawText('Condições para avançar e próximos passos para transformar a leitura em ação.', margin, 34, width, 8.2, colors.slate)
+  drawText(
+    'Condições para avançar e próximos passos para transformar a leitura em ação.',
+    margin,
+    34,
+    width,
+    8.2,
+    colors.slate,
+  )
   y = 43
   y = drawSection('Condições antes de qualquer piloto', y)
   const statusHeight = Math.max(17, textHeight(report.pilotStatus, 8.2, width - 18, true) + 9)
@@ -383,15 +413,44 @@ function createRaioxPdf(report: Report) {
     })
   }
   doc.addPage()
-  y = 20
+  drawTopRule()
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7.3)
+  doc.setTextColor(...colors.olive)
+  doc.text('LIBERAÇÃO DE VALOR', margin, 18)
+  doc.setFontSize(16.5)
+  doc.setTextColor(...colors.teal)
+  doc.text('Da leitura à ação', margin, 27)
+  drawText(
+    'Condições para avançar e próximos passos para transformar a leitura em ação.',
+    margin,
+    34,
+    width,
+    8.2,
+    colors.slate,
+  )
   y = 43
   if (report.tipo === 'empresa' && report.context.processo) {
     y = drawSection('Processo escolhido', y + 1)
-    y = drawListItem(report.context.processo, y, colors.paper, colors.teal, 8.1, 'Processo escolhido')
+    y = drawListItem(
+      report.context.processo,
+      y,
+      colors.paper,
+      colors.teal,
+      8.1,
+      'Processo escolhido',
+    )
   }
   if (report.tipo === 'executivo' && report.context.mudancaDesejada) {
     y = drawSection('O que você gostaria de mudar', y + 1)
-    y = drawListItem(report.context.mudancaDesejada, y, colors.paper, colors.sage, 8.1, 'O que você gostaria de mudar')
+    y = drawListItem(
+      report.context.mudancaDesejada,
+      y,
+      colors.paper,
+      colors.sage,
+      8.1,
+      'O que você gostaria de mudar',
+    )
   }
   if (report.tipo === 'empresa' && report.context.porQueAgora) {
     y = drawSection('Por que agora', y + 1)
@@ -399,11 +458,25 @@ function createRaioxPdf(report: Report) {
   }
   if (report.tipo === 'empresa' && report.context.fluxoAtual) {
     y = drawSection('Fluxo descrito', y + 1)
-    y = drawListItem(report.context.fluxoAtual, y, colors.paper, colors.slate, 8.1, 'Fluxo descrito')
+    y = drawListItem(
+      report.context.fluxoAtual,
+      y,
+      colors.paper,
+      colors.slate,
+      8.1,
+      'Fluxo descrito',
+    )
   }
   if (report.tipo === 'empresa' && report.context.criterioSucesso) {
     y = drawSection('Critério de sucesso informado', y + 1)
-    y = drawListItem(report.context.criterioSucesso, y, colors.paper, colors.olive, 8.1, 'Critério de sucesso')
+    y = drawListItem(
+      report.context.criterioSucesso,
+      y,
+      colors.paper,
+      colors.olive,
+      8.1,
+      'Critério de sucesso',
+    )
   }
   y += 2
   y = drawSection('L — Liberação de Valor', y)
@@ -425,7 +498,14 @@ function createRaioxPdf(report: Report) {
   doc.text('PRIMEIRA APLICAÇÃO', margin + 6, y + 7)
   doc.text('RESULTADO A ACOMPANHAR', margin + metricWidth + metricGap + 6, y + 7)
   drawText(report.primeiraAplicacao, margin + 6, y + 14, metricWidth - 12, metricFont, colors.ink)
-  drawText(report.measurement, margin + metricWidth + metricGap + 6, y + 14, metricWidth - 12, metricFont, colors.ink)
+  drawText(
+    report.measurement,
+    margin + metricWidth + metricGap + 6,
+    y + 14,
+    metricWidth - 12,
+    metricFont,
+    colors.ink,
+  )
   y += metricHeight + 4
   y += 2
   y = drawSection('Próximas ações', y)
@@ -469,9 +549,14 @@ function createRaioxPdf(report: Report) {
     doc.setFontSize(7)
     doc.setTextColor(...colors.slate)
     doc.text('SIMBIOSIA · RAIO-X FAROL', margin, 289)
-    doc.text(`${String(page).padStart(2, '0')} / ${String(pageCount).padStart(2, '0')}`, 210 - margin, 289, {
-      align: 'right',
-    })
+    doc.text(
+      `${String(page).padStart(2, '0')} / ${String(pageCount).padStart(2, '0')}`,
+      210 - margin,
+      289,
+      {
+        align: 'right',
+      },
+    )
   }
   return doc.output('datauristring')
 }
