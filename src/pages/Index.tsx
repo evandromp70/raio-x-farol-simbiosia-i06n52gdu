@@ -95,8 +95,8 @@ function createRaioxPdf(report: Report) {
   doc.text('Raio-X FAROL', margin, y)
   y += 9
   addText('L — Liberação de Valor · Processo e valor com IA', 10, [80, 98, 102], 9)
-  addText(`Nome: ${report.nome}`, 10, [23, 59, 66], 3)
-  if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [23, 59, 66], 3)
+  addText(`Nome: ${report.nome}`, 10, [16, 69, 79], 3)
+  if (report.empresa) addText(`Empresa: ${report.empresa}`, 10, [16, 69, 79], 3)
   addText(
     `Contexto: ${report.tipo === 'executivo' ? 'Meu processo profissional' : 'Minha empresa'}`,
     10,
@@ -104,55 +104,108 @@ function createRaioxPdf(report: Report) {
     3,
   )
 
+  y += 4
+  const stageBlockHeight = (stage: Report['stages'][number]) =>
+    5 + estimateTextHeight(stage.reading, 9, 0) + 4
+  const stagesHeight =
+    15 * 0.45 + 8 + report.stages.reduce((total, stage) => total + stageBlockHeight(stage), 0)
+  ensureSpace(stagesHeight)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
   doc.text('Seu FAROL', margin, y)
   y += 8
-  report.stages.forEach((stage) =>
-    addText(
-      `${stage.key} — ${stage.title}: ${stage.score}/100 · ${stage.state}\n${stage.reading}`,
-      10,
-      [23, 59, 66],
-      6,
-    ),
-  )
+  report.stages.forEach((stage) => {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(16, 69, 79)
+    doc.text(`${stage.key} — ${stage.title}`, margin, y)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`${stage.score}/100 · ${stage.state}`, margin + 32, y)
+    y += 2.5
+    doc.setFillColor(129, 130, 116)
+    doc.roundedRect(margin, y, width, 3.5, 1.75, 1.75, 'F')
+    doc.setFillColor(16, 69, 79)
+    doc.roundedRect(margin, y, Math.max(5, (width * stage.score) / 100), 3.5, 1.75, 1.75, 'F')
+    y += 5.5
+    addText(stage.reading, 9, [80, 98, 102], 4)
+  })
+  doc.addPage()
+  y = 20
+  const recommendationHeight =
+    15 * 0.45 + 8 + 12 + estimateTextHeight(report.routingExplanation, 10, 6) + 10
+  ensureSpace(recommendationHeight)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
   doc.text('Próximo passo recomendado', margin, y)
-  y += 8
-  addText(report.nextProduct, 14, [16, 69, 79], 3)
+  y += 6
+  doc.setFillColor(189, 224, 56)
+  doc.roundedRect(margin, y - 1, width, 11, 2, 2, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(14)
+  doc.setTextColor(16, 69, 79)
+  doc.text(report.nextProduct, margin + 4, y + 6.5)
+  y += 15
   addText(report.routingExplanation, 10, [80, 98, 102], 6)
 
+  const gatesHeight =
+    15 * 0.45 +
+    8 +
+    8 +
+    report.pilotConditions.reduce(
+      (total, item) => total + estimateTextHeight(`• ${item}`, 9, 3),
+      0,
+    ) +
+    (report.safetyAlerts.length > 0
+      ? 13 * 0.45 +
+        7 +
+        report.safetyAlerts.reduce(
+          (total, item) => total + estimateTextHeight(`• ${item}`, 9, 3),
+          0,
+        ) +
+        2
+      : 0)
+  ensureSpace(gatesHeight)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
   doc.setTextColor(16, 69, 79)
   doc.text('Condições antes de qualquer piloto', margin, y)
+  y += 7
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  const statusWidth = doc.getTextWidth(report.pilotStatus) + 6
+  doc.setFillColor(16, 69, 79)
+  doc.roundedRect(margin, y - 4, statusWidth, 6, 3, 3, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.text(report.pilotStatus, margin + 3, y)
   y += 8
-  addText(`Status: ${report.pilotStatus}`, 10, [23, 59, 66], 4)
-  report.pilotConditions.forEach((item) => addText(`• ${item}`, 9, [23, 59, 66], 3))
+  report.pilotConditions.forEach((item) => addText(`• ${item}`, 9, [16, 69, 79], 3))
   if (report.safetyAlerts.length > 0) {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
     doc.setTextColor(16, 69, 79)
     doc.text('Segurança e revisão', margin, y)
     y += 7
-    report.safetyAlerts.forEach((item) => addText(`• ${item}`, 9, [23, 59, 66], 3))
+    report.safetyAlerts.forEach((item) => addText(`• ${item}`, 9, [16, 69, 79], 3))
     y += 2
   }
+  doc.addPage()
+  y = 20
   const liberationItems: Array<[string, number, [number, number, number], number]> = [
-    [`Primeira ação: ${report.firstValue}`, 10, [23, 59, 66], 5],
+    [`Primeira ação: ${report.firstValue}`, 10, [16, 69, 79], 5],
   ]
+  if (report.tipo === 'empresa' && report.context.processo)
+    liberationItems.push([`Processo escolhido: ${report.context.processo}`, 9, [80, 98, 102], 5])
   if (report.tipo === 'executivo' && report.context.mudancaDesejada)
     liberationItems.push([
       `O que você gostaria de mudar: ${report.context.mudancaDesejada}`,
       10,
-      [23, 59, 66],
+      [16, 69, 79],
       5,
     ])
   if (report.tipo === 'empresa' && report.context.porQueAgora)
-    liberationItems.push([`Por que agora: ${report.context.porQueAgora}`, 10, [23, 59, 66], 5])
+    liberationItems.push([`Por que agora: ${report.context.porQueAgora}`, 10, [16, 69, 79], 5])
   if (report.tipo === 'empresa' && report.context.fluxoAtual)
     liberationItems.push([`Fluxo descrito: ${report.context.fluxoAtual}`, 9, [80, 98, 102], 5])
   if (report.tipo === 'empresa' && report.context.criterioSucesso)
@@ -163,8 +216,8 @@ function createRaioxPdf(report: Report) {
       5,
     ])
   liberationItems.push(
-    [`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [23, 59, 66], 5],
-    [`Resultado a acompanhar: ${report.measurement}.`, 10, [23, 59, 66], 7],
+    [`Primeira aplicação: ${report.primeiraAplicacao}.`, 10, [16, 69, 79], 5],
+    [`Resultado a acompanhar: ${report.measurement}.`, 10, [16, 69, 79], 7],
   )
   const liberationHeight =
     15 * 0.45 +
@@ -183,7 +236,7 @@ function createRaioxPdf(report: Report) {
   addSectionHeading('Cuidados para esta etapa')
   report.avoid.forEach((item) => addText(`• ${item}`, 10, [23, 59, 66], 3))
 
-  addText(report.limitations, 8, [80, 98, 102], 4)
+  addText(report.limitations, 9, [80, 98, 102], 4)
   return doc.output('datauristring')
 }
 
