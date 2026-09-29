@@ -310,20 +310,23 @@ export function createRaioxPdfModern(report: Report): string {
   p2 += statusH + 2.2
 
   const gateGap = 4
-  const gateW = (width - gateGap) / 2
   const gates = report.pilotConditions || []
   const alerts = report.safetyAlerts || []
+  const hasAlerts = alerts.length > 0
+  const gateW = hasAlerts ? (width - gateGap) / 2 : width
   const gateHdrY = p2
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(5.7)
   doc.setTextColor(...C.olive)
   doc.text('PONTOS A CONFIRMAR', margin, gateHdrY + 3.5)
-  doc.text('SEGURANÇA E REVISÃO', margin + gateW + gateGap, gateHdrY + 3.5)
-  const drawGate = (value: string, x: number, top: number, accent: Color) => {
+  if (hasAlerts) {
+    doc.text('SEGURANÇA E REVISÃO', margin + gateW + gateGap, gateHdrY + 3.5)
+  }
+  const drawGate = (value: string, x: number, top: number, w: number, accent: Color) => {
     const font = 5.6
-    const lines = linesFor(value, font, gateW - 7)
+    const lines = linesFor(value, font, w - 7)
     const h = Math.max(6.8, lines.length * font * 0.46 + 2.3)
-    card(x, top, gateW, h, C.white)
+    card(x, top, w, h, C.white)
     doc.setFillColor(...accent)
     doc.circle(x + 2.2, top + h / 2, 0.55, 'F')
     doc.setFont('helvetica', 'normal')
@@ -337,12 +340,12 @@ export function createRaioxPdfModern(report: Report): string {
   const overflow: Array<[string, Color]> = []
   gates.forEach((value) => {
     if (gyL + textH(value, 5.6, gateW - 7) + 3 < safeBottom)
-      gyL = drawGate(value, margin, gyL, C.sage)
+      gyL = drawGate(value, margin, gyL, gateW, C.sage)
     else overflow.push([value, C.sage])
   })
   alerts.forEach((value) => {
     if (gyR + textH(value, 5.6, gateW - 7) + 3 < safeBottom)
-      gyR = drawGate(value, margin + gateW + gateGap, gyR, C.olive)
+      gyR = drawGate(value, margin + gateW + gateGap, gyR, gateW, C.olive)
     else overflow.push([value, C.olive])
   })
   if (overflow.length) {
@@ -387,7 +390,7 @@ export function createRaioxPdfModern(report: Report): string {
           ['Critério de sucesso', report.context.criterioSucesso, C.olive],
         ].filter(([, value]) => !!value) as Array<[string, string, Color]>)
       : report.context.mudancaDesejada
-        ? [['O que você gostaria de mudar', report.context.mudancaDesejada, C.sage]]
+        ? [['Mudança desejada', report.context.mudancaDesejada, C.sage]]
         : []
   if (contextItems.length) {
     y = section(
