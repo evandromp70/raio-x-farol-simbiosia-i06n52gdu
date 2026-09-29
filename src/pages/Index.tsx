@@ -15,6 +15,8 @@ import {
   SIMBIOSIA_PDF_LOGO_WIDTH,
 } from '@/services/simbiosiaLogo'
 import { submitRaiox, RaioxTipo } from '@/services/raiox'
+import { createRaioxPdfModern } from '@/services/raioxPdf'
+import { createRaioxPdfModern } from '@/services/raioxPdf'
 
 type Answer = string | string[]
 type Question = {
@@ -1680,7 +1682,7 @@ export default function Index() {
         respostas: answers,
       }
       const prepared = await submitRaiox({ mode: 'prepare', ...basePayload })
-      const pdfBase64 = createRaioxPdf(prepared.report)
+      const pdfBase64 = createRaioxPdfModern(prepared.report)
       const sent = await submitRaiox({ mode: 'send', ...basePayload, pdfBase64 })
       setReport(prepared.report)
       setEmailSent(sent.emailStatus === 'sent')
