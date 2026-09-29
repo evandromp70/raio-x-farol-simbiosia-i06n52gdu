@@ -322,7 +322,7 @@ export function createRaioxPdfModern(report: Report): string {
   const drawGate = (value: string, x: number, top: number, accent: Color) => {
     const font = 5.6
     const lines = linesFor(value, font, gateW - 7)
-    const h = Math.max(6.8, lines.length * lineHeight(font) + 2.3)
+    const h = Math.max(6.8, lines.length * font * 0.46 + 2.3)
     card(x, top, gateW, h, C.white)
     doc.setFillColor(...accent)
     doc.circle(x + 2.2, top + h / 2, 0.55, 'F')
