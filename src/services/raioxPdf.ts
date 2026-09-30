@@ -123,6 +123,7 @@ export function createRaioxPdfModern(report: Report): string {
   const logoHeight = (logoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
   const logoBase64 = SIMBIOSIA_PDF_LOGO_PNG.replace(/^data:image\/png;base64,/, '')
   const logoBytes = Uint8Array.from(atob(logoBase64), (char) => char.charCodeAt(0))
+  const logoDataUri = `data:image/png;base64,${logoBase64}`
   const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
   if (pngSignature.some((byte, index) => logoBytes[index] !== byte)) {
     throw new Error(
@@ -131,7 +132,7 @@ export function createRaioxPdfModern(report: Report): string {
   }
   topRule()
   doc.addImage(
-    SIMBIOSIA_PDF_LOGO_PNG,
+    logoDataUri,
     'PNG',
     margin,
     10,
@@ -167,36 +168,15 @@ export function createRaioxPdfModern(report: Report): string {
     doc.text(item.label, item.x, identityY + 6.2)
     drawText(item.value, item.x, identityY + 12.8, item.w, 7.1, C.ink, true)
   })
-  const heroY = 77
-  card(margin, heroY, width, 35, C.teal, C.teal)
-  doc.setFillColor(...C.lime)
-  doc.roundedRect(margin, heroY + 5, 1.7, 25, 0.7, 0.7, 'F')
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.3)
-  doc.setTextColor(...C.lime)
-  doc.text('PRÓXIMO PASSO RECOMENDADO', margin + 6, heroY + 7.8)
-  doc.setFontSize(11.6)
-  doc.setTextColor(...C.white)
-  doc.text(report.nextProduct, margin + 6, heroY + 16)
-  drawText(report.routingExplanation, margin + 6, heroY + 21.2, 122, 6.8, C.white)
-  const scoreX = pageW - margin - 16.5
-  const scoreY = heroY + 17.4
-  doc.setFillColor(...C.lime)
-  doc.circle(scoreX, scoreY, 8.8, 'F')
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.setTextColor(...C.teal)
-  doc.text(String(report.overall), scoreX, scoreY + 0.5, { align: 'center' })
-  doc.setFontSize(5.6)
-  doc.text('/100', scoreX, scoreY + 4.4, { align: 'center' })
 
-  y = section('Seu FAROL', 120)
+
+  y = section('Seu FAROL', 84)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(6.2)
   doc.setTextColor(...C.slate)
   doc.text('Pontuação por eixo · escala comum 0–100', pageW - margin, y - 4.3, { align: 'right' })
-  const chartY = 130
-  const rowStep = 24
+  const chartY = 102
+  const rowStep = 29
   report.stages.forEach((stage, index) => {
     const top = chartY + index * rowStep
     doc.setFont('helvetica', 'bold')
@@ -503,8 +483,36 @@ export function createRaioxPdfModern(report: Report): string {
     }
   }
 
-  y = section('Importante', y + 0.3)
+  const recommendationHeight = 35
   const limitH = Math.max(14, textH(report.limitations, 5.5, width - 9) + 6)
+  const reservedHeight = recommendationHeight + 2 + 7.4 + limitH + 2
+  if (y + reservedHeight > safeBottom) continuation('Próximo passo recomendado')
+
+  const heroY = y + 0.3
+  card(margin, heroY, width, recommendationHeight, C.teal, C.teal)
+  doc.setFillColor(...C.lime)
+  doc.roundedRect(margin, heroY + 5, 1.7, 25, 0.7, 0.7, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(6.3)
+  doc.setTextColor(...C.lime)
+  doc.text('PRÓXIMO PASSO RECOMENDADO', margin + 6, heroY + 7.8)
+  doc.setFontSize(11.6)
+  doc.setTextColor(...C.white)
+  doc.text(report.nextProduct, margin + 6, heroY + 16)
+  drawText(report.routingExplanation, margin + 6, heroY + 21.2, 122, 6.8, C.white)
+  const scoreX = pageW - margin - 16.5
+  const scoreY = heroY + 17.4
+  doc.setFillColor(...C.lime)
+  doc.circle(scoreX, scoreY, 8.8, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.setTextColor(...C.teal)
+  doc.text(String(report.overall), scoreX, scoreY + 0.5, { align: 'center' })
+  doc.setFontSize(5.6)
+  doc.text('/100', scoreX, scoreY + 4.4, { align: 'center' })
+  y = heroY + recommendationHeight + 2
+
+  y = section('Importante', y)
   if (y + limitH > 274) {
     continuation('Importante')
     y = section('Importante · continuação', y)
@@ -520,10 +528,18 @@ export function createRaioxPdfModern(report: Report): string {
     doc.setDrawColor(...C.line)
     doc.setLineWidth(0.25)
     doc.line(margin, footerLine, pageW - margin, footerLine)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(6.2)
-    doc.setTextColor(...C.slate)
-    doc.text('SIMBIOSIA · RAIO-X FAROL', margin, footerText)
+    const footerLogoWidth = 42
+    const footerLogoHeight = (footerLogoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
+    doc.addImage(
+      logoDataUri,
+      'PNG',
+      margin,
+      footerLine + 0.9,
+      footerLogoWidth,
+      footerLogoHeight,
+      'simbiosia-official',
+      'FAST',
+    )
     doc.text(
       `${String(p).padStart(2, '0')} / ${String(pages).padStart(2, '0')}`,
       pageW - margin,
@@ -531,5 +547,3 @@ export function createRaioxPdfModern(report: Report): string {
       { align: 'right' },
     )
   }
-  return doc.output('datauristring')
-}
