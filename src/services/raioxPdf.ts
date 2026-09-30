@@ -161,10 +161,6 @@ export function createRaioxPdfModern(report: Report): string {
   })
 
   y = section('Seu FAROL', 84)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(6.2)
-  doc.setTextColor(...C.slate)
-  doc.text('Pontuação por eixo · escala comum 0–100', pageW - margin, y - 4.3, { align: 'right' })
   const chartY = 102
   const rowStep = 29
   report.stages.forEach((stage, index) => {
@@ -191,13 +187,6 @@ export function createRaioxPdfModern(report: Report): string {
     doc.setTextColor(...C.slate)
     doc.text(stage.state, margin, top + 14.2)
   })
-  const axisY = chartY + rowStep * report.stages.length - 1.8
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(5.9)
-  doc.setTextColor(...C.slate)
-  doc.text('0', margin, axisY)
-  doc.text('50', margin + width / 2, axisY, { align: 'center' })
-  doc.text('100', pageW - margin, axisY, { align: 'right' })
 
   // Página 2 — leituras, gargalo, status, condições e alertas.
   doc.addPage()
@@ -209,15 +198,7 @@ export function createRaioxPdfModern(report: Report): string {
   doc.setFontSize(14)
   doc.setTextColor(...C.teal)
   doc.text('Leitura por etapa', margin, 25)
-  drawText(
-    'A pontuação organiza a conversa; cada eixo mostra um aspecto do cenário.',
-    margin,
-    31,
-    width,
-    7,
-    C.slate,
-  )
-  let readY = 36
+  let readY = 31
   const readGap = 4
   const readW = (width - readGap) / 2
   for (let r = 0; r < 2; r += 1) {
@@ -297,8 +278,6 @@ export function createRaioxPdfModern(report: Report): string {
     const lines = linesFor(value, font, w - 7)
     const h = Math.max(6.8, lines.length * font * 0.46 + 2.3)
     card(x, top, w, h, C.white)
-    doc.setFillColor(...accent)
-    doc.circle(x + 2.2, top + h / 2, 0.55, 'F')
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(font)
     doc.setTextColor(...C.ink)
@@ -341,15 +320,7 @@ export function createRaioxPdfModern(report: Report): string {
   doc.setFontSize(14)
   doc.setTextColor(...C.teal)
   doc.text('Da leitura à ação', margin, 25)
-  drawText(
-    'Condições para avançar e próximos passos para transformar a leitura em ação.',
-    margin,
-    31,
-    width,
-    7,
-    C.slate,
-  )
-  y = 36
+  y = 30
 
   const contextItems: Array<[string, string, Color]> =
     report.tipo === 'empresa'
@@ -440,13 +411,7 @@ export function createRaioxPdfModern(report: Report): string {
     pair.forEach((value, j) => {
       const x = margin + j * (stepW + stepGap)
       card(x, y, stepW, rowH, C.white)
-      doc.setFillColor(...C.teal)
-      doc.circle(x + 2.6, y + 3.6, 1.8, 'F')
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(5.1)
-      doc.setTextColor(...C.white)
-      doc.text(String(i + j + 1), x + 2.6, y + 4.2, { align: 'center' })
-      drawText(value, x + 5, y + 3.2, stepW - 7, 5.9, C.ink)
+      drawText(value, x + 4, y + 3.2, stepW - 8, 5.9, C.ink)
     })
     y += rowH + 1
   }
@@ -465,9 +430,7 @@ export function createRaioxPdfModern(report: Report): string {
       pair.forEach((value, j) => {
         const x = margin + j * (stepW + stepGap)
         card(x, y, stepW, rowH, C.paper)
-        doc.setFillColor(...C.olive)
-        doc.circle(x + 2.3, y + rowH / 2, 0.55, 'F')
-        drawText(value, x + 4.2, y + 3, stepW - 6, 5.7, C.ink)
+        drawText(value, x + 4, y + 3, stepW - 8, 5.7, C.ink)
       })
       y += rowH + 1
     }
