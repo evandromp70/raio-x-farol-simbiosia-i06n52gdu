@@ -835,20 +835,20 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   const avoidHtml = avoid
     .map((item) => '<li style="margin-bottom:6px;">' + esc(item) + '</li>')
     .join('')
-  const subject = 'Seu Raio-X FAROL — Liberação de Valor'
+  const subject = 'Seu Raio-X FAROL — Legado'
   const html =
     '<div style="font-family:Arial,sans-serif;color:#173b42;max-width:640px;margin:0 auto;line-height:1.55;">' +
-    '<div style="background:#10454f;padding:28px 30px;color:#ffffff;"><div style="font-size:13px;letter-spacing:3px;font-weight:bold;color:#bde038;">SIMBIOSIA</div><h1 style="margin:10px 0 0;font-size:28px;">Raio-X FAROL</h1><p style="margin:8px 0 0;color:#e4f2f0;">Processo e valor com IA</p></div>' +
+    '<div style="background:#10454f;padding:28px 30px;color:#ffffff;"><div style="font-size:13px;letter-spacing:3px;font-weight:bold;color:#bde038;">SIMBIOSIA</div><h1 style="margin:10px 0 0;font-size:28px;">Raio-X FAROL</h1></div>' +
     '<div style="padding:26px 30px;background:#ffffff;"><p>Olá, ' +
     esc(nome) +
-    '.</p><p>Este é o seu relatório de <strong>Liberação de Valor</strong>, o L do Método FAROL. Ele organiza os próximos passos a partir das informações que você compartilhou.</p>' +
+    '.</p><p>Este é o seu relatório de <strong>Legado</strong>, o L do Método FAROL. Ele organiza os próximos passos a partir das informações que você compartilhou.</p>' +
     '<div style="background:#f3f8f7;padding:18px;border-left:4px solid #bde038;margin:20px 0;"><div style="font-size:12px;letter-spacing:1px;color:#506266;text-transform:uppercase;">Próximo passo</div><div style="font-size:22px;font-weight:bold;margin-top:5px;color:#10454f;">' +
     esc(nextProduct) +
     '</div></div>' +
     '<h2 style="font-size:18px;color:#10454f;">Seu FAROL</h2><table style="border-collapse:collapse;width:100%;font-size:14px;">' +
     stageHtml +
     '</table>' +
-    '<h2 style="font-size:18px;color:#10454f;margin-top:24px;">L — Liberação de Valor</h2><p><strong>Primeira ação:</strong> ' +
+    '<h2 style="font-size:18px;color:#10454f;margin-top:24px;">L — Legado</h2><p><strong>Primeira ação:</strong> ' +
     esc(firstValue) +
     '</p><p><strong>Aplicação considerada:</strong> ' +
     esc(primeiraAplicacao) +

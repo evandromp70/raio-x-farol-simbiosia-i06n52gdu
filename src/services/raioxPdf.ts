@@ -139,7 +139,7 @@ export function createRaioxPdfModern(report: Report): string {
   doc.setFontSize(18.5)
   doc.setTextColor(...C.teal)
   doc.text('Raio-X FAROL', margin, y)
-  drawText('L — Liberação de Valor · Processo e valor com IA', margin, y + 6.2, width, 8, C.slate)
+  drawText('L — Legado', margin, y + 6.2, width, 8, C.slate)
   const identityY = 51
   card(margin, identityY, width, 21, C.paper)
   const identity = [
@@ -316,7 +316,7 @@ export function createRaioxPdfModern(report: Report): string {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(6.5)
   doc.setTextColor(...C.olive)
-  doc.text('LIBERAÇÃO DE VALOR', margin, 16)
+  doc.text('LEGADO', margin, 16)
   doc.setFontSize(14)
   doc.setTextColor(...C.teal)
   doc.text('Da leitura à ação', margin, 25)
@@ -363,7 +363,7 @@ export function createRaioxPdfModern(report: Report): string {
     }
   }
 
-  y = section('L — Liberação de Valor', y + 0.5)
+  y = section('L — Legado', y + 0.5)
   const metricGap = 4
   const metricW = (width - metricGap) / 2
   const metricFont = 6.5
@@ -375,8 +375,8 @@ export function createRaioxPdfModern(report: Report): string {
     ) + 9,
   )
   if (y + metricH > 272) {
-    continuation('Liberação de Valor')
-    y = section('L — Liberação de Valor · continuação', y)
+    continuation('Legado')
+    y = section('L — Legado · continuação', y)
   }
   card(margin, y, metricW, metricH, C.paper)
   card(margin + metricW + metricGap, y, metricW, metricH, C.paper)

@@ -213,14 +213,7 @@ function createRaioxPdf(report: Report) {
   doc.setFontSize(19)
   doc.setTextColor(...colors.teal)
   doc.text('Raio-X FAROL', margin, y)
-  drawText(
-    'L — Liberação de Valor · Processo e valor com IA',
-    margin,
-    y + 6.5,
-    width,
-    8.5,
-    colors.slate,
-  )
+  drawText('L — Legado', margin, y + 6.5, width, 8.5, colors.slate)
   const identityTop = 52
   drawCard(margin, identityTop, width, 23, colors.paper)
   const columns = [
@@ -382,7 +375,7 @@ function createRaioxPdf(report: Report) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(7.3)
   doc.setTextColor(...colors.olive)
-  doc.text('LIBERAÇÃO DE VALOR', margin, 18)
+  doc.text('LEGADO', margin, 18)
   doc.setFontSize(16.5)
   doc.setTextColor(...colors.teal)
   doc.text('Da leitura à ação', margin, 27)
@@ -418,7 +411,7 @@ function createRaioxPdf(report: Report) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(7.3)
   doc.setTextColor(...colors.olive)
-  doc.text('LIBERAÇÃO DE VALOR', margin, 18)
+  doc.text('LEGADO', margin, 18)
   doc.setFontSize(16.5)
   doc.setTextColor(...colors.teal)
   doc.text('Da leitura à ação', margin, 27)
@@ -480,7 +473,7 @@ function createRaioxPdf(report: Report) {
     )
   }
   y += 2
-  y = drawSection('L — Liberação de Valor', y)
+  y = drawSection('L — Legado', y)
   const metricGap = 6
   const metricWidth = (width - metricGap) / 2
   const metricFont = 8
@@ -1547,7 +1540,7 @@ function ConfirmationView({
           <div className="confirmation-icon">
             <Mail size={30} />
           </div>
-          <div className="report-kicker">L — LIBERAÇÃO DE VALOR</div>
+          <div className="report-kicker">L — LEGADO</div>
           <h1>{success ? 'Seu relatório foi enviado.' : 'Não conseguimos enviar o relatório.'}</h1>
           <p>
             {success ? (
