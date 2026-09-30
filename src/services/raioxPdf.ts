@@ -131,16 +131,7 @@ export function createRaioxPdfModern(report: Report): string {
     )
   }
   topRule()
-  doc.addImage(
-    logoDataUri,
-    'PNG',
-    margin,
-    10,
-    logoWidth,
-    logoHeight,
-    'simbiosia-official',
-    'FAST',
-  )
+  doc.addImage(logoDataUri, 'PNG', margin, 10, logoWidth, logoHeight, 'simbiosia-official', 'FAST')
 
   // Página 1 — resumo, recomendação e gráfico horizontal dos quatro eixos.
   y = 38
@@ -168,7 +159,6 @@ export function createRaioxPdfModern(report: Report): string {
     doc.text(item.label, item.x, identityY + 6.2)
     drawText(item.value, item.x, identityY + 12.8, item.w, 7.1, C.ink, true)
   })
-
 
   y = section('Seu FAROL', 84)
   doc.setFont('helvetica', 'normal')
@@ -529,7 +519,8 @@ export function createRaioxPdfModern(report: Report): string {
     doc.setLineWidth(0.25)
     doc.line(margin, footerLine, pageW - margin, footerLine)
     const footerLogoWidth = 42
-    const footerLogoHeight = (footerLogoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
+    const footerLogoHeight =
+      (footerLogoWidth * SIMBIOSIA_PDF_LOGO_HEIGHT) / SIMBIOSIA_PDF_LOGO_WIDTH
     doc.addImage(
       logoDataUri,
       'PNG',
@@ -547,3 +538,5 @@ export function createRaioxPdfModern(report: Report): string {
       { align: 'right' },
     )
   }
+  return doc.output('datauristring')
+}
