@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T21:00:07.073Z",
+  "generatedAt": "2026-09-30T23:14:38.930Z",
   "collections": [
     {
       "name": "users",
@@ -29,19 +29,129 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "raiox_submissions",
+      "type": "base",
+      "apiRules": {
+        "list": null,
+        "view": null,
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "submission_key",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "journey",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "executivo",
+            "empresa"
+          ]
+        },
+        {
+          "name": "email_status",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "pending",
+            "sent",
+            "failed"
+          ]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": [
+            "onCreate"
+          ]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_raiox_submissions_submission_key ON raiox_submissions (submission_key)",
+        "CREATE INDEX idx_raiox_submissions_created ON raiox_submissions (created DESC)",
+        "CREATE INDEX idx_raiox_submissions_email ON raiox_submissions (email)"
+      ]
+    },
+    {
+      "name": "raiox_team",
+      "type": "auth",
+      "apiRules": {
+        "list": null,
+        "view": null,
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "team_member",
+          "type": "bool",
+          "required": false,
+          "system": false
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey_pbc_427949202` ON `raiox_team` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email_pbc_427949202` ON `raiox_team` (`email`) WHERE `email` != ''"
       ]
     }
   ]

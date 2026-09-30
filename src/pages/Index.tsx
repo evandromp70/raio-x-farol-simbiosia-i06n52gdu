@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useMemo, useRef, useState } from 'react'
 import {
   Check,
   ChevronLeft,
@@ -1576,6 +1576,7 @@ export default function Index() {
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const submissionKey = useRef(crypto.randomUUID())
 
   const sections = useMemo(
     () => (tipo ? (tipo === 'executivo' ? executiveSections : companySections) : []),
@@ -1627,6 +1628,7 @@ export default function Index() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }
   const start = (value: RaioxTipo) => {
+    submissionKey.current = crypto.randomUUID()
     setTipo(value)
     setStep(0)
     setAnswers({})
@@ -1675,7 +1677,12 @@ export default function Index() {
       }
       const prepared = await submitRaiox({ mode: 'prepare', ...basePayload })
       const pdfBase64 = createRaioxPdfModern(prepared.report)
-      const sent = await submitRaiox({ mode: 'send', ...basePayload, pdfBase64 })
+      const sent = await submitRaiox({
+        mode: 'send',
+        ...basePayload,
+        pdfBase64,
+        submissionKey: submissionKey.current,
+      })
       setReport(prepared.report)
       setEmailSent(sent.emailStatus === 'sent')
       setConfirmation(true)
