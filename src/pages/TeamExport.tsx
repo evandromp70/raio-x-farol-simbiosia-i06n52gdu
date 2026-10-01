@@ -21,11 +21,7 @@ export default function TeamExport() {
     let active = true
     const syncAuthorization = () => {
       const record = pb.authStore.record
-      const allowed =
-        pb.authStore.isValid &&
-        isTeamEmail(String(record?.email || '')) &&
-        record?.team_member === true &&
-        record?.verified === true
+      const allowed = pb.authStore.isValid && isTeamEmail(String(record?.email || ''))
       if (active) setIsAuthenticated(allowed)
       if (pb.authStore.isValid && !allowed) pb.authStore.clear()
     }
@@ -57,6 +53,8 @@ export default function TeamExport() {
     setNotice('')
     try {
       await signInTeamUser(email, password)
+      setIsAuthenticated(true)
+      setNotice('Acesso liberado. Esta tela permanece aberta; clique em “Baixar CSV”.')
     } catch (err) {
       setError(getTeamAuthError(err))
     } finally {
