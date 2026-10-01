@@ -1,7 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 import { ClientResponseError } from 'pocketbase'
 
-const TEAM_EMAIL = 'jose@simbiosia.com.br'
+const TEAM_EMAIL = 'jose.aquino@simbiosia.com.br'
 
 export function normalizeTeamEmail(email: string) {
   return email.trim().toLowerCase()

@@ -70,9 +70,7 @@ export default function TeamExport() {
     setNotice('')
     try {
       await requestTeamPasswordReset(email)
-      setNotice(
-        'Se houver uma conta autorizada para este e-mail, enviaremos um link para definir ou redefinir a senha.',
-      )
+      setNotice('Solicitação enviada. Verifique jose.aquino@simbiosia.com.br e a pasta de spam.')
     } catch (err) {
       setError(getTeamAuthError(err))
     } finally {
@@ -155,10 +153,24 @@ export default function TeamExport() {
             <button className="team-primary" type="submit" disabled={busy}>
               {busy ? <Loader2 className="spin" size={18} /> : <LogIn size={18} />} Entrar
             </button>
-            <button className="team-link" type="button" onClick={onReset} disabled={busy}>
-              <Mail size={15} /> Definir / redefinir senha por e-mail
+            <button
+              className="team-link"
+              type="button"
+              onClick={() => {
+                setEmail('jose.aquino@simbiosia.com.br')
+                setError('')
+                setNotice('')
+              }}
+            >
+              <Mail size={15} /> Usar meu e-mail real para redefinir senha
             </button>
-            <p className="team-hint">Acesso exclusivo a jose@simbiosia.com.br.</p>
+            <button className="team-link" type="button" onClick={onReset} disabled={busy}>
+              {busy ? <Loader2 className="spin" size={15} /> : <Mail size={15} />} Enviar link de
+              redefinição
+            </button>
+            <p className="team-hint">
+              Use o seu endereço de e-mail verdadeiro da equipe Simbiosia.
+            </p>
           </form>
         )}
         {error && (

@@ -5,7 +5,7 @@ routerAdd('GET', '/backend/v1/raiox-export', (e) => {
     auth.getBool('verified') !== true ||
     String(auth.getString('email') || '')
       .trim()
-      .toLowerCase() !== 'jose@simbiosia.com.br' ||
+      .toLowerCase() !== 'jose.aquino@simbiosia.com.br' ||
     auth.getBool('team_member') !== true
   ) {
     return e.forbiddenError('Acesso restrito à equipe autorizada.')
