@@ -1,13 +1,13 @@
 import pb from '@/lib/pocketbase/client'
 import { ClientResponseError } from 'pocketbase'
 
-const TEAM_EMAILS = ['jose@simbiosia.com.br', 'evandro@simbiosia.com.br']
+const TEAM_EMAIL = 'jose@simbiosia.com.br'
 
 export function normalizeTeamEmail(email: string) {
   return email.trim().toLowerCase()
 }
 export function isTeamEmail(email: string) {
-  return TEAM_EMAILS.includes(normalizeTeamEmail(email))
+  return normalizeTeamEmail(email) === TEAM_EMAIL
 }
 
 export async function signInTeamUser(email: string, password: string) {
@@ -48,7 +48,9 @@ export async function exportRaioxSubmissions() {
     let message = 'Não foi possível baixar o CSV.'
     try {
       message = (await response.json()).message || message
-    } catch {}
+    } catch (parseError) {
+      if (parseError instanceof Error) message = response.statusText || message
+    }
     throw new Error(message)
   }
   return response.blob()

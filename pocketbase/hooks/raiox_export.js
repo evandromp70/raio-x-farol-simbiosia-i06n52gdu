@@ -5,29 +5,44 @@ routerAdd(
     const auth = e.auth
     if (
       !auth ||
-      !auth.verified() ||
-      String(auth.getEmail() || '')
+      auth.getBool('verified') !== true ||
+      String(auth.getString('email') || '')
         .trim()
         .toLowerCase() !== 'jose@simbiosia.com.br' ||
       auth.getBool('team_member') !== true
     ) {
-      return e.forbiddenError('Acesso restrito a José Aquino.')
+      return e.forbiddenError('Acesso restrito à equipe autorizada.')
     }
-    const records = $app.findRecordsByFilter('raiox_submissions', '', '-created', 10000, 0)
-    const escapeCsv = (value) => '"' + String(value == null ? '' : value).replace(/"/g, '""') + '"'
+
+    const escapeCsv = (value) => {
+      let text = String(value == null ? '' : value)
+      if (/^[\\t\\r ]*[=+\\-@]/.test(text)) text = "'" + text
+      return '"' + text.replace(/"/g, '""') + '"'
+    }
     const lines = ['Nome,E-mail,Percurso,Data,Status do envio']
-    records.forEach((record) => {
-      lines.push(
-        [
-          escapeCsv(record.getString('name')),
-          escapeCsv(record.getString('email')),
-          escapeCsv(record.getString('journey')),
-          escapeCsv(record.getString('created')),
-          escapeCsv(record.getString('email_status')),
-        ].join(','),
-      )
-    })
-    const csv = '\\uFEFF' + lines.join('\\r\\n')
+    const pageSize = 500
+    let offset = 0
+    let page = []
+
+    do {
+      page = $app.findRecordsByFilter('raiox_submissions', '', '-created', pageSize, offset)
+      page.forEach((record) => {
+        lines.push(
+          [
+            escapeCsv(record.getString('name')),
+            escapeCsv(record.getString('email')),
+            escapeCsv(record.getString('journey')),
+            escapeCsv(record.getString('created')),
+            escapeCsv(record.getString('email_status')),
+          ].join(','),
+        )
+      })
+      offset += page.length
+    } while (page.length === pageSize)
+
+    const csv = '\uFEFF' + lines.join('\r\n') + '\r\n'
+    e.response.header().set('Content-Disposition', 'attachment; filename="leads-raio-x-farol.csv"')
+    e.response.header().set('Cache-Control', 'no-store, private')
     return e.blob(200, 'text/csv; charset=utf-8', toBytes(csv))
   },
   $apis.requireAuth(),

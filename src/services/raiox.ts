@@ -5,7 +5,7 @@ export type RaioxMode = 'prepare' | 'send'
 
 export type RaioxResponse = {
   ok: boolean
-  emailStatus: 'sent' | 'failed' | 'not_sent'
+  emailStatus: 'sent' | 'failed' | 'pending' | 'not_sent'
   report: {
     tipo: RaioxTipo
     nome: string
@@ -48,6 +48,7 @@ export async function submitRaiox(payload: {
   empresa?: string
   respostas: Record<string, string | string[]>
   pdfBase64?: string
+  submissionKey?: string
   website?: string
 }) {
   return pb.send<RaioxResponse>('/backend/v1/raiox-submit', {
