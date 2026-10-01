@@ -1,4 +1,4 @@
-routerAdd('GET', '/backend/v1/raiox-export.csv', (e) => {
+routerAdd('GET', '/backend/v1/raiox-export', (e) => {
   const auth = e.auth
   if (
     !auth ||
@@ -13,7 +13,8 @@ routerAdd('GET', '/backend/v1/raiox-export.csv', (e) => {
 
   const escapeCsv = (value) => {
     let text = String(value == null ? '' : value)
-    if (/^[=+\\-@]/.test(text.trimStart())) text = "'" + text
+    const first = text.trimStart().charAt(0)
+    if (['=', '+', '-', '@'].indexOf(first) >= 0) text = "'" + text
     return '"' + text.replace(/"/g, '""') + '"'
   }
   const lines = ['Nome,E-mail,Percurso,Data,Status do envio']

@@ -37,13 +37,10 @@ export async function exportRaioxSubmissions() {
   if (!pb.authStore.isValid || !isTeamEmail(String(pb.authStore.record?.email || ''))) {
     throw new Error('Entre com o e-mail autorizado da equipe Simbiosia.')
   }
-  const response = await fetch(
-    `${import.meta.env.VITE_POCKETBASE_URL}/backend/v1/raiox-export.csv`,
-    {
-      method: 'GET',
-      headers: { Authorization: pb.authStore.token },
-    },
-  )
+  const response = await fetch(`${import.meta.env.VITE_POCKETBASE_URL}/backend/v1/raiox-export`, {
+    method: 'GET',
+    headers: { Authorization: pb.authStore.token },
+  })
   if (!response.ok) {
     let message = 'Não foi possível baixar o CSV.'
     try {
