@@ -896,6 +896,14 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   let submissionRecord = null
   try {
     const pdfRaw = String(body.pdfBase64 || '').replace(/^data:application\/pdf[^,]*base64,/, '')
+    if (
+      !pdfRaw ||
+      pdfRaw.length > 12000000 ||
+      pdfRaw.length % 4 !== 0 ||
+      !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(pdfRaw)
+    ) {
+      return e.badRequestError('O arquivo recebido não é um PDF válido.')
+    }
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
     const bytes = []
     let buffer = 0

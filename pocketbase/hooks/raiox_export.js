@@ -13,7 +13,7 @@ routerAdd('GET', '/backend/v1/raiox-export', (e) => {
 
   const escapeCsv = (value) => {
     let text = String(value == null ? '' : value)
-    const first = text.trimStart().charAt(0)
+    const first = text.trim().charAt(0)
     if (['=', '+', '-', '@'].indexOf(first) >= 0) text = "'" + text
     return '"' + text.replace(/"/g, '""') + '"'
   }
