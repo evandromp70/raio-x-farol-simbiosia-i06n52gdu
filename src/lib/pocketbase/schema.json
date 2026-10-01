@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T23:14:38.930Z",
+  "generatedAt": "2026-10-01T18:19:03.889Z",
   "collections": [
     {
       "name": "users",
@@ -29,14 +29,19 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
@@ -56,12 +61,6 @@
       },
       "fields": [
         {
-          "name": "submission_key",
-          "type": "text",
-          "required": true,
-          "system": false
-        },
-        {
           "name": "name",
           "type": "text",
           "required": true,
@@ -74,38 +73,27 @@
           "system": false
         },
         {
-          "name": "journey",
-          "type": "select",
-          "required": true,
-          "system": false,
-          "selectValues": ["executivo", "empresa"]
-        },
-        {
-          "name": "email_status",
-          "type": "select",
-          "required": true,
-          "system": false,
-          "selectValues": ["pending", "sent", "failed"]
-        },
-        {
           "name": "created",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate"]
+          "autodateTriggers": [
+            "onCreate"
+          ]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": ["onCreate", "onUpdate"]
+          "autodateTriggers": [
+            "onCreate",
+            "onUpdate"
+          ]
         }
       ],
       "indexes": [
-        "CREATE UNIQUE INDEX idx_raiox_submissions_submission_key ON raiox_submissions (submission_key)",
-        "CREATE INDEX idx_raiox_submissions_created ON raiox_submissions (created DESC)",
-        "CREATE INDEX idx_raiox_submissions_email ON raiox_submissions (email)"
+        "CREATE UNIQUE INDEX `idx_raiox_submissions_email` ON `raiox_submissions` (email)"
       ]
     },
     {

@@ -17,22 +17,15 @@ routerAdd('GET', '/backend/v1/raiox-export', (e) => {
     if (['=', '+', '-', '@'].indexOf(first) >= 0) text = "'" + text
     return '"' + text.replace(/"/g, '""') + '"'
   }
-  const lines = ['Nome,E-mail,Percurso,Data,Status do envio']
+  const lines = ['Nome,E-mail']
   const pageSize = 500
   let offset = 0
   let page = []
-
   do {
     page = $app.findRecordsByFilter('raiox_submissions', '', '-created', pageSize, offset)
     page.forEach((record) => {
       lines.push(
-        [
-          escapeCsv(record.getString('name')),
-          escapeCsv(record.getString('email')),
-          escapeCsv(record.getString('journey')),
-          escapeCsv(record.getString('created')),
-          escapeCsv(record.getString('email_status')),
-        ].join(','),
+        [escapeCsv(record.getString('name')), escapeCsv(record.getString('email'))].join(','),
       )
     })
     offset += page.length

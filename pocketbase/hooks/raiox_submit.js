@@ -8,7 +8,6 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     .trim()
     .toLowerCase()
   const empresa = String(body.empresa || '').trim()
-  const submissionKey = String(body.submissionKey || '').trim()
 
   if (!mode) return e.badRequestError('Informe o tipo de solicitação.')
   if (!tipo) return e.badRequestError('Informe o tipo de avaliação.')
@@ -17,15 +16,6 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     return e.badRequestError('Informe um e-mail válido.')
   }
   if (body.website) return e.badRequestError('Não foi possível processar a solicitação.')
-  if (mode === 'send' && (!body.pdfBase64 || typeof body.pdfBase64 !== 'string')) {
-    return e.badRequestError('O relatório PDF não foi recebido.')
-  }
-  if (
-    mode === 'send' &&
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(submissionKey)
-  ) {
-    return e.badRequestError('A chave desta submissão não é válida.')
-  }
 
   const get = (id) => respostas[id]
   const arr = (id) => (Array.isArray(get(id)) ? get(id) : get(id) ? [get(id)] : [])
@@ -891,9 +881,11 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
   if (mode === 'prepare') {
     return e.json(200, { ok: true, emailStatus: 'not_sent', report })
   }
+  if (!body.pdfBase64 || typeof body.pdfBase64 !== 'string') {
+    return e.badRequestError('O relatório PDF não foi recebido.')
+  }
 
   let emailStatus = 'sent'
-  let submissionRecord = null
   try {
     const pdfRaw = String(body.pdfBase64 || '').replace(/^data:application\/pdf[^,]*base64,/, '')
     if (
@@ -921,53 +913,40 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     if (!bytes.length || bytes[0] !== 37 || bytes[1] !== 80 || bytes[2] !== 68 || bytes[3] !== 70) {
       return e.badRequestError('O arquivo recebido não é um PDF válido.')
     }
+
+    const submissionsCollection = $app.findCollectionByNameOrId('raiox_submissions')
+    let contactRecord = null
     try {
-      submissionRecord = $app.findFirstRecordByData(
-        'raiox_submissions',
-        'submission_key',
-        submissionKey,
-      )
+      contactRecord = $app.findFirstRecordByData('raiox_submissions', 'email', email)
     } catch (_) {}
-    if (submissionRecord) {
-      return e.json(200, {
-        ok: true,
-        emailStatus: submissionRecord.getString('email_status'),
-        report,
-      })
-    }
-    try {
-      const submissionsCollection = $app.findCollectionByNameOrId('raiox_submissions')
-      submissionRecord = new Record(submissionsCollection)
-      submissionRecord.set('submission_key', submissionKey)
-      submissionRecord.set('name', nome)
-      submissionRecord.set('email', email)
-      submissionRecord.set('journey', tipo)
-      submissionRecord.set('email_status', 'pending')
-      $app.save(submissionRecord)
-    } catch (error) {
+    if (contactRecord) {
+      if (contactRecord.getString('name') !== nome) {
+        try {
+          contactRecord.set('name', nome)
+          $app.save(contactRecord)
+        } catch (_) {
+          return e.internalServerError('Não conseguimos salvar seu nome e e-mail. Tente novamente.')
+        }
+      }
+    } else {
+      const newContact = new Record(submissionsCollection)
+      newContact.set('name', nome)
+      newContact.set('email', email)
       try {
-        const concurrentSubmission = $app.findFirstRecordByData(
-          'raiox_submissions',
-          'submission_key',
-          submissionKey,
-        )
-        return e.json(200, {
-          ok: true,
-          emailStatus: concurrentSubmission.getString('email_status'),
-          report,
-        })
-      } catch (_) {}
-      $app
-        .logger()
-        .error(
-          'raiox submission capture failed',
-          'error',
-          error && error.message ? error.message : String(error),
-        )
-      return e.internalServerError(
-        'Não conseguimos registrar a conclusão. Tente novamente ou entre em contato com a Simbiosia.',
-      )
+        $app.save(newContact)
+      } catch (_) {
+        try {
+          contactRecord = $app.findFirstRecordByData('raiox_submissions', 'email', email)
+          if (contactRecord.getString('name') !== nome) {
+            contactRecord.set('name', nome)
+            $app.save(contactRecord)
+          }
+        } catch (retryError) {
+          return e.internalServerError('Não conseguimos salvar seu nome e e-mail. Tente novamente.')
+        }
+      }
     }
+
     const settings = $app.settings()
     const attachment = $filesystem.fileFromBytes(bytes, 'raio-x-farol.pdf')
     const message = new MailerMessage({
@@ -986,20 +965,6 @@ routerAdd('POST', '/backend/v1/raiox-submit', (e) => {
     $app
       .logger()
       .error('raiox email failed', 'error', error && error.message ? error.message : String(error))
-  }
-
-  try {
-    submissionRecord.set('email_status', emailStatus)
-    $app.save(submissionRecord)
-  } catch (error) {
-    emailStatus = 'pending'
-    $app
-      .logger()
-      .error(
-        'raiox submission status update failed',
-        'error',
-        error && error.message ? error.message : String(error),
-      )
   }
 
   return e.json(emailStatus === 'sent' ? 200 : 202, { ok: true, emailStatus, report })

@@ -48,7 +48,6 @@ export async function submitRaiox(payload: {
   empresa?: string
   respostas: Record<string, string | string[]>
   pdfBase64?: string
-  submissionKey?: string
   website?: string
 }) {
   return pb.send<RaioxResponse>('/backend/v1/raiox-submit', {

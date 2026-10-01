@@ -115,8 +115,7 @@ export default function TeamExport() {
         <div className="team-kicker">ÁREA RESTRITA · SIMBIOSIA</div>
         <h1>Exportação de leads</h1>
         <p className="team-intro">
-          A base contém apenas nome, e-mail, percurso, data de envio e status do relatório.
-          Respostas e PDFs não são armazenados.
+          A planilha contém apenas nome e e-mail de quem concluiu o questionário.
         </p>
         {isAuthenticated ? (
           <>

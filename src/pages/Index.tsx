@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useRef, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import {
   Check,
   ChevronLeft,
@@ -1576,7 +1576,6 @@ export default function Index() {
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const submissionKey = useRef(crypto.randomUUID())
 
   const sections = useMemo(
     () => (tipo ? (tipo === 'executivo' ? executiveSections : companySections) : []),
@@ -1628,7 +1627,6 @@ export default function Index() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }
   const start = (value: RaioxTipo) => {
-    submissionKey.current = crypto.randomUUID()
     setTipo(value)
     setStep(0)
     setAnswers({})
@@ -1681,8 +1679,8 @@ export default function Index() {
         mode: 'send',
         ...basePayload,
         pdfBase64,
-        submissionKey: submissionKey.current,
       })
+      if (!sent.ok) throw new Error('O relatório não foi processado.')
       setReport(prepared.report)
       setEmailSent(sent.emailStatus === 'sent')
       setConfirmation(true)
