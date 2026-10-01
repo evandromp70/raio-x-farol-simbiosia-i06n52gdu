@@ -19,29 +19,31 @@ export default function TeamExport() {
 
   useEffect(() => {
     let active = true
-    const verify = async () => {
+    const syncAuthorization = () => {
+      const record = pb.authStore.record
+      const allowed =
+        pb.authStore.isValid &&
+        isTeamEmail(String(record?.email || '')) &&
+        record?.team_member === true &&
+        record?.verified === true
+      if (active) setIsAuthenticated(allowed)
+      if (pb.authStore.isValid && !allowed) pb.authStore.clear()
+    }
+    const unsubscribe = pb.authStore.onChange(syncAuthorization)
+    const verifyExistingSession = async () => {
       if (!pb.authStore.isValid) {
-        if (active) setIsAuthenticated(false)
+        syncAuthorization()
         return
       }
       try {
-        const auth = await pb.collection('raiox_team').authRefresh()
-        const allowed =
-          pb.authStore.isValid &&
-          isTeamEmail(String(auth.record.email || '')) &&
-          auth.record.team_member === true &&
-          auth.record.verified === true
-        if (active) setIsAuthenticated(allowed)
-        if (!allowed) pb.authStore.clear()
+        await pb.collection('raiox_team').authRefresh()
+        syncAuthorization()
       } catch {
         pb.authStore.clear()
         if (active) setIsAuthenticated(false)
       }
     }
-    void verify()
-    const unsubscribe = pb.authStore.onChange(() => {
-      void verify()
-    })
+    void verifyExistingSession()
     return () => {
       active = false
       unsubscribe()
